@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://username.github.io/salon-booking-demo/sitemap.xml
+Sitemap: https://pavelislamov-gif.github.io/salon-booking-demo/sitemap.xml

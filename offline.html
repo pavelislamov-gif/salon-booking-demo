@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Программа для записи клиентов оффлайн — без интернета и подписки</title>
+    <meta name="description" content="Программа для записи клиентов оффлайн: работает на компьютере без интернета и без подписки. Подходит для салона красоты, парикмахерской, барбершопа и частных мастеров.">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://pavelislamov-gif.github.io/salon-booking-demo/offline.html">
+    <style>
+        :root {
+            --primary: #d4a5b0;
+            --primary-light: #e8d0d6;
+            --primary-dark: #b88997;
+            --primary-soft: #f5e6ea;
+            --bg-main: #faf5f6;
+            --bg-card: #ffffff;
+            --text-primary: #4a3a3f;
+            --text-secondary: #8a7a80;
+            --text-light: #b5a5aa;
+            --border-light: #f0e4e7;
+            --shadow-soft: 0 10px 30px rgba(180, 130, 140, 0.08);
+            --border-radius: 24px;
+            --transition: all 0.2s ease;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .page {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 24px 20px 70px;
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: rgba(255,255,255,0.82);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius);
+            padding: 18px 22px;
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(8px);
+            margin-bottom: 24px;
+        }
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .brand strong {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .brand span {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 12px 22px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(180,130,140,0.22);
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary {
+            border: 1px solid var(--border-light);
+            background: rgba(255,255,255,0.75);
+            color: var(--text-primary);
+        }
+        .btn-secondary:hover { background: white; }
+        .hero {
+            background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,255,255,0.74));
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            padding: 38px 34px;
+            margin-bottom: 24px;
+        }
+        .eyebrow {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-size: 40px;
+            line-height: 1.1;
+            font-weight: 380;
+            letter-spacing: -0.8px;
+            max-width: 860px;
+            margin-bottom: 16px;
+        }
+        .hero p {
+            max-width: 820px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+        .hero-points {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+        .pill {
+            border: 1px solid var(--border-light);
+            background: rgba(255,255,255,0.8);
+            color: var(--text-secondary);
+            font-size: 13px;
+            border-radius: 999px;
+            padding: 8px 14px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            padding: 28px 24px;
+        }
+        .card h2 {
+            font-size: 24px;
+            font-weight: 420;
+            margin-bottom: 16px;
+        }
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+        }
+        .list {
+            display: grid;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .list-item {
+            padding: 14px 16px;
+            border: 1px solid var(--border-light);
+            background: #fff;
+            border-radius: 16px;
+        }
+        .list-item strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+        .list-item span {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        .cta-box {
+            background: linear-gradient(135deg, rgba(212,165,176,0.14), rgba(255,255,255,0.95));
+        }
+        .footer-note {
+            margin-top: 20px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+        @media (max-width: 860px) {
+            h1 { font-size: 31px; }
+            .grid { grid-template-columns: 1fr; }
+            .topbar { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                <strong>Beauty Space</strong>
+                <span>Отдельная страница под оффлайн-запросы</span>
+            </div>
+            <nav class="nav">
+                <a class="btn btn-secondary" href="https://pavelislamov-gif.github.io/salon-booking-demo/">Открыть демо</a>
+                <a class="btn btn-primary" href="https://vk.com/pashkevich_wtf" target="_blank" rel="noopener noreferrer">Написать во VK</a>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <div class="eyebrow">Оффлайн программа</div>
+            <h1>Программа для записи клиентов оффлайн — без интернета, без подписки, на компьютер</h1>
+            <p>
+                Это простая программа для записи клиентов без интернета, которая подходит для салона красоты,
+                парикмахерской, барбершопа и частных мастеров. Система работает на компьютере, помогает вести
+                календарь записи, хранить клиентов и быстро видеть свободное время.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="https://pavelislamov-gif.github.io/salon-booking-demo/">Посмотреть демо</a>
+                <a class="btn btn-secondary" href="https://vk.com/pashkevich_wtf" target="_blank" rel="noopener noreferrer">Получить полную версию</a>
+            </div>
+            <div class="hero-points">
+                <span class="pill">Работает без интернета</span>
+                <span class="pill">Без ежемесячной оплаты</span>
+                <span class="pill">Устанавливается на ПК</span>
+                <span class="pill">Подходит для небольшого салона</span>
+            </div>
+        </section>
+
+        <section class="grid">
+            <div class="card">
+                <h2>Кому подходит эта программа</h2>
+                <p>
+                    Если вам нужна программа записи клиентов на компьютер, но вы не хотите сложную CRM и
+                    ежемесячную подписку, то этот вариант подходит лучше всего. Он рассчитан на тех,
+                    кому нужна понятная запись клиентов оффлайн и быстрый порядок в расписании.
+                </p>
+                <div class="list">
+                    <div class="list-item">
+                        <strong>Салон красоты</strong>
+                        <span>Для администратора, которому нужен календарь записи и удобное расписание мастеров.</span>
+                    </div>
+                    <div class="list-item">
+                        <strong>Парикмахерская</strong>
+                        <span>Для работы без лишних модулей, когда важны скорость и простота.</span>
+                    </div>
+                    <div class="list-item">
+                        <strong>Барбершоп</strong>
+                        <span>Для быстрой записи клиентов, контроля свободного времени и простой организации дня.</span>
+                    </div>
+                    <div class="list-item">
+                        <strong>Частный мастер</strong>
+                        <span>Когда нужна программа для записи клиентов без интернета и без сложных настроек.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card cta-box">
+                <h2>Почему это удобно</h2>
+                <p><strong>Без интернета.</strong> Можно работать локально на компьютере и не зависеть от сети.</p>
+                <p><strong>Без подписки.</strong> Не нужно платить каждый месяц за доступ к системе.</p>
+                <p><strong>Без перегруза.</strong> Нет сложной CRM, только запись клиентов, мастера, время и порядок.</p>
+                <p><strong>Есть демо.</strong> Можно открыть и посмотреть, как всё работает, перед покупкой.</p>
+                <div style="margin-top: 22px;">
+                    <a class="btn btn-primary" href="https://vk.com/pashkevich_wtf" target="_blank" rel="noopener noreferrer">Написать разработчику</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Что умеет оффлайн-версия</h2>
+            <p>
+                Эта программа для записи клиентов без интернета помогает вести календарь мастеров, создавать
+                записи по времени, хранить телефон клиента, услугу и заметки. Подходит как простая программа
+                для салона красоты без подписки и как программа записи клиентов на компьютер для небольшого бизнеса.
+            </p>
+            <p>
+                Если вам нужна программа для записи клиентов оффлайн, которую можно открыть на ПК и сразу
+                начать использовать, демо-версия покажет весь основной сценарий работы. Полную версию можно
+                получить напрямую через VK.
+            </p>
+            <div style="margin-top: 22px; display:flex; gap:12px; flex-wrap:wrap;">
+                <a class="btn btn-secondary" href="https://pavelislamov-gif.github.io/salon-booking-demo/">Открыть демо-страницу</a>
+                <a class="btn btn-primary" href="https://vk.com/pashkevich_wtf" target="_blank" rel="noopener noreferrer">Получить программу</a>
+            </div>
+        </section>
+
+        <div class="footer-note">
+            Страница создана под запросы: программа для записи клиентов оффлайн, программа без интернета,
+            программа для салона красоты без подписки, программа записи клиентов на компьютер.
+        </div>
+    </div>
+</body>
+</html>

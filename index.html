@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Программа для записи клиентов в салон красоты — демо версии</title>
-    <meta name="description" content="Демо программы для записи клиентов: салон красоты, парикмахерская, барбершоп. Календарь мастеров, расписание и управление записями. Время демо указано по часовому поясу Новосибирск (UTC+7).">
+    <title>Демо программы для записи клиентов</title>
+    <meta name="description" content="Программа для записи клиентов для салона красоты, парикмахерской, барбершопа и частных мастеров. Календарь, мастера, цены, доход и напоминания.">
     <meta name="robots" content="index,follow">
-    <meta name="google-site-verification" content="">
-    <link rel="canonical" href="https://pavelislamov-gif.github.io/salon-booking-demo/">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <style>
         :root {
             --primary: #d4a5b0;
@@ -17,6 +13,7 @@
             --primary-dark: #b88997;
             --primary-soft: #f5e6ea;
             --bg-main: #faf5f6;
+            --bg-card: #ffffff;
             --header-gradient-start: #ffffff;
             --header-gradient-end: #faf5f6;
             --calendar-gradient-start: #ffffff;
@@ -39,261 +36,1209 @@
             --time-slot-text: #4a3a3f;
             --time-slot-free-text: #b88997;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { min-height: 100vh; }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-main);
             color: var(--text-primary);
             line-height: 1.5;
             position: relative;
-            margin: 0;
-            padding: 0;
         }
+
         #bgImageLayer {
-            position: fixed; inset: 0; background-size: cover; background-position: center;
-            background-repeat: no-repeat; opacity: 0.08; pointer-events: none; z-index: -1;
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: -1;
         }
-        .app { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; position: relative; z-index: 1; }
+
+        .app {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
         .app-header {
-            position: sticky; top: 0; z-index: 20;
+            position: sticky;
+            top: 0;
+            z-index: 20;
             background: linear-gradient(135deg, var(--header-gradient-start) 0%, var(--header-gradient-end) 100%);
-            padding: 24px 28px; border-radius: var(--border-radius); box-shadow: var(--shadow-soft);
-            border: 1px solid var(--border-light); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;
+            padding: 24px 28px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-light);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
         }
+
         .header-title { flex: 1; text-align: center; }
-        .header-title h1 { font-size: 26px; font-weight: 350; color: var(--text-primary); letter-spacing: -0.3px; margin-bottom: 6px; }
-        .header-contacts { display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 13px; color: var(--text-secondary); }
-        .header-contact-item { display: flex; align-items: center; gap: 6px; }
-        .header-contact-separator { width: 3px; height: 3px; background: var(--primary-light); border-radius: 50%; }
-        .header-left { width: 100px; }
-        .header-right { width: 100px; display: flex; justify-content: flex-end; }
-        .btn-settings, .btn {
-            border-radius: 40px; cursor: pointer; transition: var(--transition);
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
         }
-        .btn-settings {
-            padding: 10px 20px; font-size: 14px; font-weight: 450; background: rgba(255,255,255,0.6);
-            backdrop-filter: blur(8px); color: var(--text-primary); border: 1px solid var(--border-light);
+
+        .header-contacts {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .header-contact-item { display: flex; align-items: center; gap: 6px; }
+        .header-contact-separator {
+            width: 3px;
+            height: 3px;
+            background: var(--primary-light);
+            border-radius: 50%;
+        }
+
+        .header-left { width: 170px; display:flex; gap:10px; flex-wrap:wrap; }
+        .header-right { width: 120px; display: flex; justify-content: flex-end; }
+
+        .btn-settings, .btn-header {
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 450;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
-        .btn-settings:hover { background: white; border-color: var(--primary-light); box-shadow: 0 4px 12px rgba(180,130,140,0.08); }
-        .btn {
-            padding: 12px 24px; font-size: 14px; font-weight: 500; border: none; background: none;
-            text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+
+        .btn-settings:hover, .btn-header:hover {
+            background: white;
+            border-color: var(--primary-light);
+            box-shadow: 0 4px 12px rgba(180, 130, 140, 0.08);
         }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(180,130,140,0.2); }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            background: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(180, 130, 140, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
         .btn-secondary {
-            background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            color: var(--text-secondary);
             border: 1px solid var(--border-light);
         }
-        .btn-secondary:hover { background: white; border-color: var(--primary-light); }
+
+        .btn-secondary:hover {
+            background: white;
+            border-color: var(--primary-light);
+        }
+
         .btn-small { padding: 8px 16px; font-size: 13px; }
         .btn-block { width: 100%; }
-        .main-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
-        .left-panel { position: sticky; top: 140px; }
-        .calendar-card, .schedule-panel, .hero-card {
-            border-radius: var(--border-radius); box-shadow: var(--shadow-soft); border: 1px solid var(--border-light);
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+            align-items: start;
         }
-        .calendar-card {
+
+        .left-panel { min-width: 0; }
+
+        .left-sticky {
+            position: sticky;
+            top: 128px;
+            max-height: calc(100vh - 148px);
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .left-sticky::-webkit-scrollbar { width: 4px; }
+        .left-sticky::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 4px;
+        }
+
+        .calendar-card, .schedule-panel, .summary-card {
             background: linear-gradient(135deg, var(--calendar-gradient-start) 0%, var(--calendar-gradient-end) 100%);
-            padding: 28px 24px; height: fit-content; backdrop-filter: blur(4px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            padding: 28px 24px;
+            border: 1px solid var(--border-light);
+            backdrop-filter: blur(4px);
         }
-        .calendar-header { margin-bottom: 20px; }
-        .calendar-header h3 { font-size: 17px; font-weight: 450; color: var(--text-primary); letter-spacing: -0.2px; }
+
+        .calendar-card { height: fit-content; }
+
+        .calendar-header, .summary-card h3 { margin-bottom: 18px; }
+        .calendar-header h3, .summary-card h3 {
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+
         .master-select-wrapper { margin-bottom: 20px; }
+
         .master-select {
-            width: 100%; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);
-            font-size: 14px; background: rgba(255,255,255,0.7); color: var(--text-primary); cursor: pointer; backdrop-filter: blur(4px);
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--text-primary);
+            cursor: pointer;
+            backdrop-filter: blur(4px);
         }
-        .flatpickr-calendar { box-shadow: none !important; width: 100% !important; background: transparent !important; }
-        .flatpickr-calendar * { color: var(--calendar-text) !important; }
-        .flatpickr-day:hover { background: var(--calendar-day-hover) !important; }
-        .flatpickr-day.selected {
-            background: var(--calendar-day-selected-bg) !important; border-color: var(--calendar-day-selected-bg) !important;
-            color: var(--calendar-day-selected-text) !important;
+
+        #calendar {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
         }
-        .flatpickr-day.today { border-color: var(--primary) !important; }
-        .flatpickr-prev-month, .flatpickr-next-month { fill: var(--calendar-text) !important; }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .calendar-month {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--calendar-header-text);
+        }
+
+        .calendar-arrow {
+            border: 1px solid var(--border-light);
+            background: rgba(255,255,255,0.7);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .calendar-arrow:hover { background: white; }
+
+        .calendar-weekdays,
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-size: 12px;
+            color: var(--calendar-header-text);
+            padding: 4px 0;
+        }
+
+        .calendar-day {
+            border: none;
+            background: rgba(255,255,255,0.4);
+            border-radius: 12px;
+            min-height: 42px;
+            cursor: pointer;
+            color: var(--calendar-text);
+            font-size: 14px;
+        }
+
+        .calendar-day:hover { background: var(--calendar-day-hover); }
+        .calendar-day.empty { visibility: hidden; }
+        .calendar-day.selected {
+            background: var(--calendar-day-selected-bg);
+            color: var(--calendar-day-selected-text);
+        }
+        .calendar-day.today {
+            outline: 2px solid var(--primary);
+            outline-offset: -2px;
+        }
+        .calendar-day.past-day:not(.selected):not(.today) {
+            opacity: 0.38;
+            background: rgba(255,255,255,0.25);
+        }
+
         .selected-date-info {
-            margin-top: 24px; padding: 18px 16px; background: rgba(255,255,255,0.5); backdrop-filter: blur(4px);
-            border-radius: var(--border-radius-sm); text-align: center; border: 1px solid var(--border-light);
+            margin-top: 24px;
+            padding: 18px 16px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            border: 1px solid var(--border-light);
         }
-        .selected-date-info .date { font-size: 18px; font-weight: 450; color: var(--primary-dark); }
+
+        .selected-date-info .date {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--primary-dark);
+        }
+
         .create-btn-wrapper { margin-top: 20px; }
-        .schedule-panel {
-            background: linear-gradient(135deg, var(--panel-gradient-start) 0%, var(--panel-gradient-end) 100%);
-            padding: 28px 24px; backdrop-filter: blur(4px);
+
+        .summary-card { margin-top: 18px; }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
-        .schedule-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-        .schedule-header h2 { font-size: 18px; font-weight: 450; color: var(--text-primary); letter-spacing: -0.2px; }
-        .time-grid { display: flex; flex-direction: column; gap: 8px; max-height: 520px; overflow-y: auto; padding-right: 6px; }
+
+        .stat-box {
+            background: rgba(255,255,255,0.66);
+            border: 1px solid var(--border-light);
+            border-radius: 18px;
+            padding: 14px 16px;
+        }
+
+        .stat-box-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .stat-box-value {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .master-load-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .master-load-item {
+            background: rgba(255,255,255,0.66);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 12px 14px;
+        }
+
+        .master-load-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .master-load-name { font-weight: 500; color: var(--text-primary); }
+        .master-load-meta { color: var(--text-secondary); }
+
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #f1ebed;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 999px;
+        }
+
+        .schedule-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .schedule-header h2 {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+
+        .schedule-stats {
+            margin-bottom: 18px;
+            padding: 16px;
+            background: rgba(255,255,255,0.55);
+            border: 1px solid var(--border-light);
+            border-radius: 18px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .schedule-stats strong { color: var(--text-primary); }
+
+        .time-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 680px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
         .time-grid::-webkit-scrollbar { width: 4px; }
-        .time-grid::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 4px; }
+        .time-grid::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 4px;
+        }
+
         .time-row {
-            display: flex; align-items: flex-start; padding: 16px 18px; background: rgba(255,255,255,0.4); backdrop-filter: blur(4px);
-            border-radius: var(--border-radius-sm); border: 1px solid transparent; transition: var(--transition);
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(4px);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid transparent;
+            transition: var(--transition);
         }
-        .time-row.has-appointment { background: rgba(255,255,255,0.8); border-color: var(--primary-light); box-shadow: 0 2px 8px rgba(180,130,140,0.06); }
-        .time-label { font-size: 16px; font-weight: 500; min-width: 70px; color: var(--time-slot-text); }
-        .appointment-info { flex: 1; margin-left: 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-        .appointment-details { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-        .appointment-client { font-weight: 500; color: var(--text-primary); }
+
+        .time-row.has-appointment {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: var(--primary-light);
+            box-shadow: 0 2px 8px rgba(180, 130, 140, 0.06);
+        }
+
+        .time-label {
+            font-size: 16px;
+            font-weight: 600;
+            min-width: 70px;
+            color: var(--time-slot-text);
+        }
+
+        .appointment-info {
+            flex: 1;
+            margin-left: 18px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .appointment-details {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .appointment-client {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
         .appointment-service { font-size: 13px; color: var(--text-secondary); }
+
+        .appointment-exact-time {
+            font-size: 13px;
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .appointment-master,
+        .appointment-price,
+        .appointment-reminder-state,
+        .appointment-visits {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-top: 6px;
+            align-self: flex-start;
+        }
+
         .appointment-master {
-            font-size: 12px; color: var(--primary-dark); background: var(--primary-soft); padding: 3px 10px;
-            border-radius: 30px; display: inline-block; margin-top: 4px; align-self: flex-start;
+            color: var(--primary-dark);
+            background: var(--primary-soft);
         }
-        .appointment-phone { font-size: 12px; color: var(--text-light); margin-top: 2px; }
-        .appointment-note, .appointment-reminder {
-            font-size: 12px; padding: 4px 10px; border-radius: 20px; margin-top: 6px; display: inline-block; align-self: flex-start;
+
+        .appointment-price {
+            color: #35604d;
+            background: #e8f5ef;
         }
-        .appointment-note { color: #c0848c; background: #fdf2f4; border-left: 2px solid #d4a5b0; }
-        .appointment-reminder { color: #7a7690; background: #f7f5fc; border-left: 2px solid #b8b0d9; }
-        .free-slot-indicator { color: var(--time-slot-free-text); font-size: 14px; opacity: 0.8; }
-        .appointment-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+        .appointment-reminder-state {
+            color: #6b5b6b;
+            background: #f1ebf5;
+        }
+
+        .appointment-visits {
+            color: #936f2a;
+            background: #fff6dd;
+        }
+
+        .appointment-phone {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .appointment-note {
+            font-size: 12px;
+            color: #c0848c;
+            background: #fdf2f4;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-top: 6px;
+            display: inline-block;
+            align-self: flex-start;
+            border-left: 2px solid #d4a5b0;
+        }
+
+        .free-slot-indicator {
+            color: var(--time-slot-free-text);
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
         .icon-btn {
-            background: rgba(255,255,255,0.5); border: 1px solid var(--border-light); color: var(--text-secondary); cursor: pointer;
-            padding: 6px 12px; border-radius: 30px; font-size: 12px; transition: var(--transition); font-weight: 450;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            transition: var(--transition);
+            font-weight: 450;
         }
-        .icon-btn:hover { background: white; color: var(--primary-dark); border-color: var(--primary-light); }
-        .icon-btn.delete:hover { background: #fce4e8; color: #c0848c; border-color: #f0c4cc; }
-        .empty-state { text-align: center; padding: 48px 20px; color: var(--text-light); font-size: 15px; }
+
+        .icon-btn:hover {
+            background: white;
+            color: var(--primary-dark);
+            border-color: var(--primary-light);
+        }
+
+        .icon-btn.delete:hover {
+            background: #fce4e8;
+            color: #c0848c;
+            border-color: #f0c4cc;
+        }
+
+
+        .create-at-time-btn {
+            min-width: 34px;
+            padding: 6px 12px;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1;
+            color: white;
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .create-at-time-btn:hover {
+            background: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-light);
+            font-size: 15px;
+        }
+
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(6px);
-            display: none; align-items: center; justify-content: center; z-index: 1000;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.15);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
+
         .modal {
-            background: #ffffff; border-radius: 24px; padding: 36px; width: 500px; max-width: 90%; max-height: 85vh; overflow-y: auto;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.1); border: 1px solid #f0e4e7;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 36px;
+            width: 560px;
+            max-width: 92%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+            border: 1px solid #f0e4e7;
         }
-        .modal.large { width: 700px; }
-        .modal h3 { font-size: 22px; font-weight: 400; margin-bottom: 28px; color: #4a3a3f; letter-spacing: -0.3px; }
-        .modal-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
-        .modal-form-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-        .modal-form-field label { font-size: 13px; font-weight: 500; color: #8a7a80; }
+
+        .modal.large { width: 760px; }
+
+        .modal h3 {
+            font-size: 22px;
+            font-weight: 400;
+            margin-bottom: 28px;
+            color: #4a3a3f;
+            letter-spacing: -0.3px;
+        }
+
+        .modal-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .modal-form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .modal-form-field label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #8a7a80;
+        }
+
         .modal-form-input, .modal-form-select, .modal-form-textarea {
-            padding: 14px 16px; border: 1px solid #f0e4e7; border-radius: 14px; font-size: 14px; background: white;
-            transition: all 0.2s ease; font-family: 'Inter', sans-serif;
+            padding: 14px 16px;
+            border: 1px solid #f0e4e7;
+            border-radius: 14px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
         }
-        .modal-form-textarea { resize: vertical; min-height: 80px; }
-        .modal-form-input:focus, .modal-form-select:focus, .modal-form-textarea:focus { outline: none; border-color: #d4a5b0; }
-        .modal-actions { display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap; }
-        .settings-menu { display: flex; flex-direction: column; gap: 6px; margin-bottom: 28px; }
+
+        .modal-form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-form-input:focus, .modal-form-select:focus, .modal-form-textarea:focus {
+            outline: none;
+            border-color: #d4a5b0;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .settings-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 28px;
+        }
+
         .settings-menu-item {
-            padding: 16px 18px; background: #faf5f6; border-radius: 14px; cursor: pointer; transition: all 0.2s ease;
-            display: flex; align-items: center; gap: 14px; border: 1px solid transparent;
+            padding: 16px 18px;
+            background: #faf5f6;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 1px solid transparent;
         }
-        .settings-menu-item:hover, .settings-menu-item.active { background: white; border-color: #d4a5b0; }
+
+        .settings-menu-item:hover, .settings-menu-item.active {
+            background: white;
+            border-color: #d4a5b0;
+        }
+
         .settings-menu-item-content { flex: 1; }
         .settings-menu-item-title { font-weight: 500; color: #4a3a3f; }
         .settings-menu-item-desc { font-size: 12px; color: #8a7a80; }
-        .settings-content { background: #faf5f6; border-radius: 14px; padding: 28px; min-height: 320px; }
+
+        .settings-content {
+            background: #faf5f6;
+            border-radius: 14px;
+            padding: 28px;
+            min-height: 320px;
+        }
+
         .settings-section { display: none; }
         .settings-section.active { display: block; }
-        .masters-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; max-height: 320px; overflow-y: auto; }
-        .master-item {
-            display: flex; align-items: center; justify-content: space-between; padding: 16px; background: white;
-            border-radius: 14px; border: 1px solid #f0e4e7;
+
+        .masters-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+            max-height: 320px;
+            overflow-y: auto;
         }
-        .master-item-info { display: flex; flex-direction: column; gap: 4px; }
-        .master-item-name { font-weight: 500; color: #4a3a3f; }
-        .master-item-specialization {
-            font-size: 12px; color: #b88997; background: #f5e6ea; padding: 3px 10px;
-            border-radius: 30px; display: inline-block; align-self: flex-start;
+
+        .master-item, .client-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: white;
+            border-radius: 14px;
+            border: 1px solid #f0e4e7;
+            gap: 12px;
         }
-        .master-item-actions { display: flex; gap: 8px; }
-        .settings-group { background: white; border-radius: 16px; padding: 20px; border: 1px solid #f0e4e7; margin-bottom: 24px; }
+
+        .master-item-info, .client-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex:1;
+        }
+
+        .master-item-name, .client-item-name {
+            font-weight: 500;
+            color: #4a3a3f;
+        }
+
+        .master-item-specialization, .client-item-tag {
+            font-size: 12px;
+            color: #b88997;
+            background: #f5e6ea;
+            padding: 3px 10px;
+            border-radius: 30px;
+            display: inline-block;
+            align-self: flex-start;
+        }
+
+        .client-item-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .master-item-actions, .client-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .settings-group {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #f0e4e7;
+            margin-bottom: 24px;
+        }
+
         .settings-group-title {
-            font-size: 15px; font-weight: 500; color: #4a3a3f; margin-bottom: 16px;
-            padding-bottom: 12px; border-bottom: 1px solid #f0e4e7;
+            font-size: 15px;
+            font-weight: 500;
+            color: #4a3a3f;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0e4e7;
         }
-        .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
         .theme-card {
-            padding: 20px 12px; background: #faf5f6; border-radius: 14px; cursor: pointer;
-            transition: all 0.2s ease; border: 2px solid transparent; text-align: center;
+            padding: 20px 12px;
+            background: #faf5f6;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            text-align: center;
         }
-        .theme-card:hover, .theme-card.active { background: white; border-color: #d4a5b0; }
-        .theme-preview { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
-        .theme-color { width: 30px; height: 30px; border-radius: 10px; }
-        .theme-name { font-weight: 500; color: #4a3a3f; margin-bottom: 4px; }
-        .theme-desc { font-size: 11px; color: #8a7a80; }
-        .setting-item { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-        .setting-item label { font-size: 13px; font-weight: 500; color: #8a7a80; }
+
+        .theme-card:hover, .theme-card.active {
+            background: white;
+            border-color: #d4a5b0;
+        }
+
+        .theme-preview {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .theme-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+        }
+
+        .theme-name {
+            font-weight: 500;
+            color: #4a3a3f;
+            margin-bottom: 4px;
+        }
+
+        .theme-desc {
+            font-size: 11px;
+            color: #8a7a80;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .setting-item label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #8a7a80;
+        }
+
         .setting-item input[type="range"] { width: 100%; }
+
         .image-upload-area {
-            border: 2px dashed #e8d0d6; border-radius: 14px; padding: 24px; text-align: center; cursor: pointer;
-            transition: all 0.2s ease; background: white;
+            border: 2px dashed #e8d0d6;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
         }
-        .image-upload-area:hover { border-color: #d4a5b0; background: #f5e6ea; }
-        .image-preview { margin-top: 16px; display: flex; align-items: center; gap: 16px; }
-        .image-preview img { width: 70px; height: 70px; object-fit: cover; border-radius: 12px; }
+
+        .image-upload-area:hover {
+            border-color: #d4a5b0;
+            background: #f5e6ea;
+        }
+
+        .image-preview {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .image-preview img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        
+        .clients-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .search-input {
+            width:100%;
+            padding: 12px 14px;
+            border:1px solid #f0e4e7;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            font-size:14px;
+        }
+
+        .client-history {
+            margin-top:8px;
+            padding:12px 14px;
+            background:#faf5f6;
+            border:1px solid #f0e4e7;
+            border-radius:14px;
+            font-size:13px;
+            color:var(--text-secondary);
+        }
+
+        .hero-note {
+            margin-bottom: 18px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.65);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+
+
+        .main-layout.layout-swapped {
+            grid-template-columns: 1fr 380px;
+        }
+
+        .main-layout.layout-swapped .left-panel {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .main-layout.layout-swapped .schedule-panel {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .layout-choice {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .layout-option {
+            border: 2px solid transparent;
+            background: #faf5f6;
+            border-radius: 16px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .layout-option:hover,
+        .layout-option.active {
+            background: white;
+            border-color: #d4a5b0;
+        }
+
+        .layout-preview {
+            display: grid;
+            grid-template-columns: 34% 1fr;
+            gap: 6px;
+            height: 54px;
+            margin-bottom: 10px;
+        }
+
+        .layout-option[data-layout="calendar-right"] .layout-preview {
+            grid-template-columns: 1fr 34%;
+        }
+
+        .layout-preview-calendar,
+        .layout-preview-schedule {
+            border-radius: 10px;
+            background: #e8d0d6;
+        }
+
+        .layout-preview-schedule {
+            background: #ffffff;
+            border: 1px solid #f0e4e7;
+        }
+
+        .layout-option-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a3a3f;
+        }
+
+        .layout-option-desc {
+            font-size: 11px;
+            color: #8a7a80;
+            margin-top: 3px;
+        }
+
+        /* Живые анимации интерфейса */
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.96) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes softPulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(180, 130, 140, 0.06); }
+            50% { box-shadow: 0 0 0 4px rgba(212, 165, 176, 0.18), 0 6px 18px rgba(180, 130, 140, 0.12); }
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(12px); }
+        }
+
+        .modal-overlay[style*="flex"] .modal {
+            animation: modalPop 0.18s ease-out;
+        }
+
+        .time-row {
+            animation: cardIn 0.22s ease-out both;
+        }
+
+        .time-row.upcoming-soon {
+            animation: cardIn 0.22s ease-out both, softPulse 1.8s ease-in-out infinite;
+            border-color: var(--primary-light);
+        }
+
+        .icon-btn,
+        .btn,
+        .btn-settings,
+        .btn-header,
+        .calendar-day,
+        .calendar-arrow {
+            transform: translateZ(0);
+        }
+
+        .icon-btn:hover,
+        .btn:hover,
+        .btn-settings:hover,
+        .btn-header:hover,
+        .calendar-day:hover,
+        .calendar-arrow:hover {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .icon-btn:active,
+        .btn:active,
+        .btn-settings:active,
+        .btn-header:active,
+        .calendar-day:active,
+        .calendar-arrow:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .progress-bar {
+            transition: width 0.65s ease;
+            animation: progressGlow 1.2s ease-out;
+        }
+
+        @keyframes progressGlow {
+            from { filter: brightness(1.12); }
+            to { filter: brightness(1); }
+        }
+
+        .toast-container {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            min-width: 240px;
+            max-width: 340px;
+            padding: 13px 16px;
+            border-radius: 16px;
+            background: rgba(42, 36, 42, 0.92);
+            color: #fff;
+            font-size: 13px;
+            line-height: 1.35;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.16);
+            backdrop-filter: blur(8px);
+            animation: toastIn 0.22s ease-out;
+        }
+
+        .toast.hide {
+            animation: toastOut 0.18s ease-in forwards;
+        }
+
+        .appointment-time-exact {
+            font-size: 12px;
+            color: var(--primary-dark);
+            background: var(--primary-soft);
+            padding: 4px 10px;
+            border-radius: 30px;
+            display: inline-block;
+            align-self: flex-start;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+
+
         .demo-badge {
-            position: fixed; right: 18px; bottom: 18px; z-index: 9999; background: rgba(34, 28, 31, 0.86); color: #fff;
-            padding: 10px 16px; border-radius: 999px; font-size: 12px; letter-spacing: 1.2px; box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 2500;
+            background: rgba(34, 28, 31, 0.88);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            letter-spacing: 1.2px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
         }
-        .hero-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.72) 100%);
-            padding: 34px 32px; margin-bottom: 24px; backdrop-filter: blur(8px);
+
+        .demo-warning {
+            margin-bottom: 18px;
+            padding: 14px 18px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.72);
+            border: 1px dashed var(--primary-light);
+            color: var(--text-secondary);
+            font-size: 14px;
         }
-        .hero-eyebrow {
-            display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--primary-soft);
-            color: var(--primary-dark); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px;
+
+        .calendar-day.demo-locked-day {
+            opacity: 0.22;
+            cursor: not-allowed;
         }
-        .hero-card h2 {
-            font-size: 34px; line-height: 1.12; font-weight: 380; letter-spacing: -0.8px; margin-bottom: 14px;
-            color: var(--text-primary); max-width: 840px;
+
+        /* Компактная карточка записи */
+        .appointment-details.compact-details {
+            gap: 8px;
         }
-        .hero-card p { font-size: 15px; color: var(--text-secondary); max-width: 840px; }
-        .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
-        .hero-note { font-size: 13px; color: var(--text-light); margin-top: 14px; }
-        .timezone-chip {
-            display: inline-flex; margin-top: 12px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.8);
-            border: 1px solid var(--border-light); font-size: 12px; color: var(--text-secondary);
+
+        .appointment-main-line {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 12px;
         }
-        .feature-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
-        .feature-card { background: rgba(255,255,255,0.68); border: 1px solid var(--border-light); border-radius: 20px; padding: 18px 16px; }
-        .feature-card strong { display: block; font-size: 15px; font-weight: 550; margin-bottom: 6px; color: var(--text-primary); }
-        .feature-card span { font-size: 13px; color: var(--text-secondary); }
-        .seo-copy {
-            margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border-light);
-            display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px;
+
+        .appointment-client {
+            font-size: 15px;
         }
-        .seo-copy-block { background: rgba(255,255,255,0.52); border: 1px solid var(--border-light); border-radius: 18px; padding: 18px; }
-        .seo-copy-block h3 { font-size: 16px; margin-bottom: 8px; font-weight: 550; }
-        .seo-copy-block p, .seo-copy-block li { font-size: 13px; color: var(--text-secondary); }
-        .seo-copy-block ul { padding-left: 18px; }
-        .demo-limit-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-        .demo-pill {
-            font-size: 12px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.78);
-            border: 1px solid var(--border-light); color: var(--text-secondary);
+
+        .appointment-time-exact {
+            margin-top: 0;
+            flex: 0 0 auto;
         }
-        .contact-strip { margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
-        .mini-demo-note {
-            margin-top: 14px; padding: 12px 14px; background: rgba(255,255,255,0.62); border: 1px dashed var(--primary-light);
-            border-radius: 16px; color: var(--text-secondary); font-size: 13px;
+
+        .appointment-service {
+            font-size: 13px;
+            color: var(--text-secondary);
         }
-        .checkbox-inline { display: flex; align-items: center; gap: 10px; color: #4a3a3f; cursor: pointer; }
-        .reminder-status-box { margin-top: 16px; padding: 14px; background: #faf5f6; border-radius: 14px; border: 1px solid #f0e4e7; }
+
+        .appointment-phone {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 0;
+        }
+
+        .appointment-meta-line {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .appointment-master,
+        .appointment-price,
+        .appointment-reminder-state,
+        .appointment-visits,
+        .appointment-note {
+            margin-top: 0;
+        }
+
+        .time-row.has-appointment {
+            padding: 14px 16px;
+        }
+
+        .appointment-actions {
+            align-items: center;
+            justify-content: flex-end;
+            min-width: 250px;
+        }
+
+        @media (max-width: 720px) {
+            .appointment-info {
+                flex-direction: column;
+            }
+
+            .appointment-actions {
+                min-width: 0;
+                justify-content: flex-start;
+            }
+        }
+
+
         @media (max-width: 980px) {
-            .feature-grid, .seo-copy, .main-layout { grid-template-columns: 1fr; }
-            .hero-card h2 { font-size: 28px; }
+            .main-layout { grid-template-columns: 1fr; }
             .left-panel { position: static; }
-            .app-header { position: static; flex-wrap: wrap; }
+            .left-sticky { position: static; max-height: none; overflow: visible; padding-right: 0; }
+            .app-header {
+                position: static;
+                flex-wrap: wrap;
+            }
             .header-left, .header-right { width: auto; }
-            .header-contacts { flex-direction: column; gap: 6px; }
+            .header-contacts {
+                flex-direction: column;
+                gap: 6px;
+            }
             .header-contact-separator { display: none; }
-            .theme-grid { grid-template-columns: 1fr; }
             .modal.large { width: 95%; }
+            .theme-grid { grid-template-columns: 1fr; }
+            .modal-form-row { grid-template-columns: 1fr; }
+
+            .main-layout.layout-swapped {
+                grid-template-columns: 1fr;
+            }
+
+            .main-layout.layout-swapped .left-panel,
+            .main-layout.layout-swapped .schedule-panel {
+                grid-column: auto;
+                grid-row: auto;
+            }
+
+            .layout-choice {
+                grid-template-columns: 1fr;
+            }
+
         }
     </style>
 </head>
 <body>
 <div id="bgImageLayer"></div>
 <div class="demo-badge">ДЕМО ВЕРСИЯ</div>
+
 <div class="app">
     <div class="app-header">
-        <div class="header-left"></div>
+        <div class="header-left"><button class="btn-header" id="openClientsBtn" type="button">Клиенты</button></div>
         <div class="header-title">
             <h1><span id="salonNameDisplay">Beauty Space</span></h1>
             <div class="header-contacts" id="headerContacts">
@@ -306,91 +1251,118 @@
             <button class="btn-settings" id="openSettingsBtn">Настройки</button>
         </div>
     </div>
-    <section class="hero-card" aria-label="Демо программы для записи клиентов">
-        <div class="hero-eyebrow">Демо версия • для поиска и презентации</div>
-        <h2>Программа для записи клиентов в салон красоты, парикмахерскую и барбершоп</h2>
-        <p>Это демонстрационная версия системы записи клиентов. Здесь можно посмотреть календарь мастеров, переключение по специалистам, создание записей и общий принцип работы администратора салона.</p>
-        <div class="hero-actions">
-            <a class="btn btn-primary" href="#adminPanel">Попробовать демо</a>
-            <a class="btn btn-secondary" href="https://vk.com/pashkevich_wtf" target="_blank" rel="noopener noreferrer">Получить полную версию</a>
-        </div>
-        <div class="hero-note">Демо намеренно ограничено: оно показывает функционал, но не заменяет полноценную рабочую версию.</div>
-        <div class="timezone-chip">Часовой пояс демо: Новосибирск (UTC+7)</div>
-        <div class="feature-grid">
-            <div class="feature-card"><strong>Календарь записи</strong><span>Выбор даты, просмотр свободных и занятых слотов.</span></div>
-            <div class="feature-card"><strong>Мастера</strong><span>Переключение между специалистами и фильтрация расписания.</span></div>
-            <div class="feature-card"><strong>Запись клиента</strong><span>Имя, телефон, услуга, заметка и редактирование записи.</span></div>
-            <div class="feature-card"><strong>Уведомления</strong><span>Всплывающее напоминание за 1 час до записи, если страница открыта.</span></div>
-        </div>
-        <div class="seo-copy">
-            <div class="seo-copy-block">
-                <h3>Кому подходит такая система</h3>
-                <p>Демо программы для записи клиентов подходит для салонов красоты, парикмахерских, барбершопов и частных мастеров. На странице можно посмотреть, как работает календарь записи, расписание мастеров и простое управление клиентами без сложной CRM.</p>
-                <div class="mini-demo-note">Поисковая логика страницы заточена под запросы вроде: <strong>программа для записи клиентов</strong>, <strong>салон красоты CRM</strong>, <strong>календарь записи мастеров</strong>, <strong>программа для администратора салона</strong>.</div>
-            </div>
-            <div class="seo-copy-block">
-                <h3>Ограничения демо</h3>
-                <ul>
-                    <li>только 2 мастера;</li>
-                    <li>только ближайшие даты;</li>
-                    <li>не более 12 записей;</li>
-                    <li>без импорта и экспорта данных.</li>
-                </ul>
-                <div class="demo-limit-list">
-                    <span class="demo-pill">Живой интерфейс</span>
-                    <span class="demo-pill">Ограниченная ценность</span>
-                    <span class="demo-pill">Подходит для SEO</span>
+
+    <div class="demo-warning">
+        Это демонстрационная версия программы. Доступны основные функции, но есть ограничения: не больше 12 записей, только 2 мастера и даты в пределах вчера/сегодня/завтра. Полная версия работает без этих ограничений.
+    </div>
+
+    <div class="main-layout" id="mainLayout">
+        <div class="left-panel">
+            <div class="left-sticky">
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <h3>Календарь</h3>
                 </div>
-            </div>
-        </div>
-        <div class="contact-strip">Полная версия приложения — по запросу. Связаться во VK: <a href="https://vk.com/pashkevich_wtf" target="_blank" rel="noopener noreferrer">vk.com/pashkevich_wtf</a>. Часовой пояс демо и расписания: <strong>Новосибирск (UTC+7)</strong>.</div>
-    </section>
-    <div id="adminPanel">
-        <div class="main-layout">
-            <div class="left-panel">
-                <div class="calendar-card">
-                    <div class="calendar-header"><h3>Календарь</h3></div>
-                    <div class="master-select-wrapper">
-                        <select class="master-select" id="masterFilterSelect"><option value="">Все мастера</option></select>
+
+                <div class="master-select-wrapper">
+                    <select class="master-select" id="masterFilterSelect">
+                        <option value="">Все мастера</option>
+                    </select>
+                </div>
+
+                <div id="calendar">
+                    <div class="calendar-nav">
+                        <button class="calendar-arrow" id="prevMonthBtn" type="button">‹</button>
+                        <div class="calendar-month" id="calendarMonthLabel"></div>
+                        <button class="calendar-arrow" id="nextMonthBtn" type="button">›</button>
                     </div>
-                    <div id="calendar"></div>
-                    <div class="selected-date-info">
-                        <div class="date" id="selectedDateDisplay">Сегодня</div>
-                        <div style="font-size: 13px; margin-top: 6px; opacity: 0.7;" id="selectedMasterDisplay">Все мастера</div>
-                        <div style="font-size: 12px; margin-top: 8px; opacity: 0.65;">Часовой пояс: Новосибирск (UTC+7)</div>
+                    <div class="calendar-weekdays">
+                        <div class="calendar-weekday">Пн</div>
+                        <div class="calendar-weekday">Вт</div>
+                        <div class="calendar-weekday">Ср</div>
+                        <div class="calendar-weekday">Чт</div>
+                        <div class="calendar-weekday">Пт</div>
+                        <div class="calendar-weekday">Сб</div>
+                        <div class="calendar-weekday">Вс</div>
                     </div>
-                    <div class="create-btn-wrapper"><button class="btn btn-primary btn-block" id="openCreateModalBtn">Создать запись</button></div>
+                    <div class="calendar-days" id="calendarDays"></div>
+                </div>
+
+                <div class="selected-date-info">
+                    <div class="date" id="selectedDateDisplay">Сегодня</div>
+                    <div style="font-size: 13px; margin-top: 6px; opacity: 0.7;" id="selectedMasterDisplay">Все мастера</div>
                 </div>
             </div>
-            <div class="schedule-panel">
-                <div class="schedule-header">
-                    <h2 id="scheduleTitle">Записи на сегодня</h2>
-                    <button class="btn btn-secondary btn-small" id="refreshScheduleBtn">Обновить</button>
+
+            <div class="summary-card">
+                <h3>Сводка по дню</h3>
+                <div class="summary-grid">
+                    <div class="stat-box">
+                        <div class="stat-box-label">Доход за выбранный день</div>
+                        <div class="stat-box-value" id="incomeValue">0 ₽</div>
+                    </div>
                 </div>
-                <div class="time-grid" id="timeGrid"><div class="empty-state">Выберите дату в календаре</div></div>
+
+                <div style="margin-top: 16px;">
+                    <div class="stat-box-label" style="margin-bottom:10px;">Загрузка мастеров</div>
+                    <div class="master-load-list" id="masterLoadList">
+                        <div style="font-size:13px; color: var(--text-light);">Нет данных</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="schedule-panel">
+            <div class="schedule-header">
+                <h2 id="scheduleTitle">Записи на сегодня</h2>
+                <div class="schedule-header-actions">
+                    <button class="btn btn-primary btn-small" id="openCreateModalBtn" type="button">+ Создать запись</button>
+                    <button class="btn btn-secondary btn-small" id="refreshScheduleBtn" type="button">Обновить</button>
+                </div>
+            </div>
+
+            <div class="schedule-stats" id="statsBlock">
+                <strong>Доход за день:</strong> 0 ₽
+            </div>
+
+            <div class="time-grid" id="timeGrid">
+                <div class="empty-state">Выберите дату в календаре</div>
             </div>
         </div>
     </div>
+
     <div class="modal-overlay" id="appointmentModal">
         <div class="modal">
             <h3 id="modalTitle">Новая запись</h3>
+
             <form id="appointmentForm">
                 <input type="hidden" id="editAppointmentId" value="">
-                <input type="hidden" id="modalSelectedDate" value="">
+
                 <div class="modal-form-row">
                     <div class="modal-form-field">
+                        <label>Дата</label>
+                        <input type="date" class="modal-form-input" id="modalAppointmentDate">
+                    </div>
+                    <div class="modal-form-field">
                         <label>Время</label>
-                        <select class="modal-form-select" id="modalAppointmentTime">
-                            <option value="09:00">09:00</option><option value="10:00">10:00</option><option value="11:00">11:00</option><option value="12:00">12:00</option>
-                            <option value="13:00">13:00</option><option value="14:00">14:00</option><option value="15:00">15:00</option><option value="16:00">16:00</option>
-                            <option value="17:00">17:00</option><option value="18:00">18:00</option><option value="19:00">19:00</option><option value="20:00">20:00</option>
+                        <input type="time" class="modal-form-input" id="modalAppointmentTime" value="10:00">
+                    </div>
+                </div>
+
+                <div class="modal-form-row">
+                    <div class="modal-form-field">
+                        <label>Мастер</label>
+                        <select class="modal-form-select" id="modalAppointmentMaster">
+                            <option value="">Выберите мастера</option>
                         </select>
                     </div>
                     <div class="modal-form-field">
-                        <label>Мастер</label>
-                        <select class="modal-form-select" id="modalAppointmentMaster"><option value="">Выберите мастера</option></select>
+                        <label>Цена (₽)</label>
+                        <input type="number" class="modal-form-input" id="modalAppointmentPrice" placeholder="1500" min="0" step="1">
                     </div>
                 </div>
+
                 <div class="modal-form-row">
                     <div class="modal-form-field">
                         <label>Имя клиента</label>
@@ -401,20 +1373,24 @@
                         <input type="tel" class="modal-form-input" id="modalAppointmentPhone" placeholder="+7 999 123-45-67">
                     </div>
                 </div>
+
                 <div class="modal-form-field">
                     <label>Услуга</label>
                     <input type="text" class="modal-form-input" id="modalAppointmentService" placeholder="Стрижка, окрашивание...">
                 </div>
+
                 <div class="modal-form-field">
                     <label>Заметка</label>
                     <textarea class="modal-form-textarea" id="modalAppointmentNote" placeholder="Например: перезвонить за час, уточнить длину волос..."></textarea>
                 </div>
+
                 <div class="modal-form-field">
-                    <label class="checkbox-inline">
+                    <label class="checkbox-row">
                         <input type="checkbox" id="modalAppointmentRemind" checked>
-                        <span>Показать всплывающее напоминание за 1 час</span>
+                        <span>Напомнить за 1 час</span>
                     </label>
                 </div>
+
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary" id="modalSaveBtn">Создать запись</button>
                     <button type="button" class="btn btn-secondary" id="modalCancelBtn">Отмена</button>
@@ -422,169 +1398,420 @@
             </form>
         </div>
     </div>
+
     <div class="modal-overlay" id="settingsModal">
         <div class="modal large">
             <h3>Настройки</h3>
+
             <div class="settings-menu">
-                <div class="settings-menu-item active" data-section="masters"><div class="settings-menu-item-content"><div class="settings-menu-item-title">Мастера</div><div class="settings-menu-item-desc">Управление специалистами</div></div></div>
-                <div class="settings-menu-item" data-section="appearance"><div class="settings-menu-item-content"><div class="settings-menu-item-title">Оформление</div><div class="settings-menu-item-desc">Готовые цветовые схемы</div></div></div>
-                <div class="settings-menu-item" data-section="salon"><div class="settings-menu-item-content"><div class="settings-menu-item-title">Салон</div><div class="settings-menu-item-desc">Название и контакты</div></div></div>
+                <div class="settings-menu-item active" data-section="masters">
+                    <div class="settings-menu-item-content">
+                        <div class="settings-menu-item-title">Мастера</div>
+                        <div class="settings-menu-item-desc">Управление специалистами</div>
+                    </div>
+                </div>
+                <div class="settings-menu-item" data-section="appearance">
+                    <div class="settings-menu-item-content">
+                        <div class="settings-menu-item-title">Оформление</div>
+                        <div class="settings-menu-item-desc">Готовые цветовые схемы</div>
+                    </div>
+                </div>
+                <div class="settings-menu-item" data-section="salon">
+                    <div class="settings-menu-item-content">
+                        <div class="settings-menu-item-title">Салон</div>
+                        <div class="settings-menu-item-desc">Название и контакты</div>
+                    </div>
+                </div>
+                <div class="settings-menu-item" data-section="data">
+                    <div class="settings-menu-item-content">
+                        <div class="settings-menu-item-title">Данные</div>
+                        <div class="settings-menu-item-desc">Экспорт и импорт</div>
+                    </div>
+                </div>
             </div>
+
             <div class="settings-content">
                 <div class="settings-section active" id="section-masters">
+                    <div style="font-size:12px;color:#8a7a80;margin-bottom:12px;">Демо: отображаются только 2 мастера. В полной версии ограничений нет.</div>
                     <div class="masters-list" id="mastersListSettings"></div>
+
                     <div style="display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;">
-                        <input type="text" id="newMasterName" placeholder="Имя мастера" style="flex: 1; min-width: 200px; padding: 12px; border: 1px solid #f0e4e7; border-radius: 14px;">
-                        <input type="text" id="newMasterSpecialization" placeholder="Специализация" style="flex: 1; min-width: 200px; padding: 12px; border: 1px solid #f0e4e7; border-radius: 14px;">
+                        <input type="text" id="newMasterName" placeholder="Имя мастера" style="flex: 1; min-width: 180px; padding: 12px; border: 1px solid #f0e4e7; border-radius: 14px;">
+                        <input type="text" id="newMasterSpecialization" placeholder="Специализация" style="flex: 1; min-width: 180px; padding: 12px; border: 1px solid #f0e4e7; border-radius: 14px;">
                         <button class="btn btn-primary" id="addMasterBtn">Добавить</button>
                     </div>
                 </div>
+
                 <div class="settings-section" id="section-appearance">
-                    <div class="settings-group"><div class="settings-group-title">Выберите цветовую схему</div><div class="theme-grid" id="themeGrid"></div></div>
+                    <div class="settings-group">
+                        <div class="settings-group-title">Выберите цветовую схему</div>
+                        <div class="theme-grid" id="themeGrid"></div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-group-title">Расположение панелей</div>
+                        <div class="layout-choice" id="layoutChoice">
+                            <div class="layout-option active" data-layout="calendar-left">
+                                <div class="layout-preview">
+                                    <div class="layout-preview-calendar"></div>
+                                    <div class="layout-preview-schedule"></div>
+                                </div>
+                                <div class="layout-option-title">Календарь слева</div>
+                                <div class="layout-option-desc">Классическое расположение</div>
+                            </div>
+                            <div class="layout-option" data-layout="calendar-right">
+                                <div class="layout-preview">
+                                    <div class="layout-preview-schedule"></div>
+                                    <div class="layout-preview-calendar"></div>
+                                </div>
+                                <div class="layout-option-title">Календарь справа</div>
+                                <div class="layout-option-desc">Расписание ближе к началу экрана</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="settings-group">
                         <div class="settings-group-title">Скругления</div>
-                        <div class="setting-item"><label>Скругление карточек (px)</label><input type="range" id="settingBorderRadius" min="0" max="40" value="24"><span id="borderRadiusValue">24px</span></div>
-                        <div class="setting-item"><label>Скругление элементов (px)</label><input type="range" id="settingBorderRadiusSm" min="0" max="30" value="14"><span id="borderRadiusSmValue">14px</span></div>
+                        <div class="setting-item">
+                            <label>Скругление карточек (px)</label>
+                            <input type="range" id="settingBorderRadius" min="0" max="40" value="24">
+                            <span id="borderRadiusValue">24px</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>Скругление элементов (px)</label>
+                            <input type="range" id="settingBorderRadiusSm" min="0" max="30" value="14">
+                            <span id="borderRadiusSmValue">14px</span>
+                        </div>
                     </div>
+
                     <div class="settings-group">
                         <div class="settings-group-title">Фоновое изображение</div>
-                        <div class="image-upload-area" id="bgImageUploadArea"><span id="uploadLabel">Нажмите или перетащите изображение</span><input type="file" id="bgImageInput" accept="image/*" style="display: none;"></div>
-                        <div class="image-preview" id="imagePreview" style="display: none;"><img id="previewImg" src="" alt="Preview"><button class="btn btn-secondary btn-small" id="removeBgImageBtn">Удалить</button></div>
-                        <div class="setting-item" style="margin-top: 18px;"><label>Прозрачность фона</label><input type="range" id="settingBgOpacity" min="0" max="0.3" step="0.02" value="0.08"><span id="opacityValue">0.08</span></div>
+                        <div class="image-upload-area" id="bgImageUploadArea">
+                            <span id="uploadLabel">Нажмите или перетащите изображение</span>
+                            <input type="file" id="bgImageInput" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="image-preview" id="imagePreview" style="display: none;">
+                            <img id="previewImg" src="" alt="Preview">
+                            <button class="btn btn-secondary btn-small" id="removeBgImageBtn">Удалить</button>
+                        </div>
+                        <div class="setting-item" style="margin-top: 18px;">
+                            <label>Прозрачность фона</label>
+                            <input type="range" id="settingBgOpacity" min="0" max="0.3" step="0.02" value="0.08">
+                            <span id="opacityValue">0.08</span>
+                        </div>
                     </div>
                 </div>
+
                 <div class="settings-section" id="section-salon">
                     <div class="settings-group">
                         <div class="settings-group-title">Информация о салоне</div>
-                        <div class="modal-form-field"><label>Название салона</label><input type="text" class="modal-form-input" id="settingSalonName" value="Beauty Space"></div>
-                        <div class="modal-form-field"><label>Телефон для связи</label><input type="tel" class="modal-form-input" id="settingSalonPhone" placeholder="+7 (999) 123-45-67"></div>
-                        <div class="modal-form-field"><label>Адрес</label><input type="text" class="modal-form-input" id="settingSalonAddress" placeholder="ул. Примерная, 123"></div>
+                        <div class="modal-form-field">
+                            <label>Название салона</label>
+                            <input type="text" class="modal-form-input" id="settingSalonName" value="Beauty Space">
+                        </div>
+                        <div class="modal-form-field" style="margin-top: 18px;">
+                            <label>Телефон для связи</label>
+                            <input type="tel" class="modal-form-input" id="settingSalonPhone" placeholder="+7 (999) 123-45-67">
+                        </div>
+                        <div class="modal-form-field" style="margin-top: 18px;">
+                            <label>Адрес</label>
+                            <input type="text" class="modal-form-input" id="settingSalonAddress" placeholder="ул. Примерная, 123">
+                        </div>
                         <p style="font-size: 12px; color: #8a7a80; margin-top: 16px;">Контактные данные отображаются в шапке под названием салона</p>
                     </div>
                 </div>
+
+                <div class="settings-section" id="section-data">
+                    <div class="settings-group">
+                        <div class="settings-group-title">Управление данными</div>
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <button class="btn btn-secondary" id="exportDataBtn" type="button">Экспорт всех данных</button>
+                            <button class="btn btn-secondary" id="importDataBtn" type="button">Импорт данных</button>
+                            <input type="file" id="importDataInput" accept=".json" style="display: none;">
+                            <button class="btn btn-secondary" id="exportThemeBtn" type="button">Экспорт темы</button>
+                            <button class="btn btn-secondary" id="importThemeBtn" type="button">Импорт темы</button>
+                            <input type="file" id="importThemeInput" accept=".json" style="display: none;">
+                            <hr style="border: none; border-top: 1px solid #f0e4e7; margin: 16px 0;">
+                            <button class="btn btn-secondary" id="resetSettingsBtn" type="button">Сбросить настройки</button>
+                            <button class="btn btn-secondary" id="clearAllDataBtn" type="button" style="color: #c0848c;">Очистить все данные</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-actions"><button class="btn btn-primary" id="saveSettingsBtn">Применить</button><button class="btn btn-secondary" id="closeSettingsBtn">Закрыть</button></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="saveSettingsBtn" type="button">Применить</button>
+                <button class="btn btn-secondary" id="closeSettingsBtn" type="button">Закрыть</button>
+            </div>
         </div>
     </div>
+
+
+    <div class="modal-overlay" id="clientsModal">
+        <div class="modal large">
+            <h3>Клиентская база</h3>
+            <input type="text" class="search-input" id="clientSearchInput" placeholder="Поиск по имени или телефону">
+            <div class="clients-list" id="clientsList"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="closeClientsBtn" type="button">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="reminderModal">
         <div class="modal">
             <h3>Напоминание о клиенте</h3>
-            <div id="reminderContent" style="line-height: 1.7; color: #4a3a3f;"></div>
-            <div class="modal-actions"><button class="btn btn-primary" id="copyReminderTextBtn">Скопировать текст</button><button class="btn btn-secondary" id="closeReminderBtn">Закрыть</button></div>
+            <div id="reminderContent" style="line-height:1.7; color:#4a3a3f;"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="copyReminderTextBtn" type="button">Скопировать текст</button>
+                <button class="btn btn-secondary" id="closeReminderBtn" type="button">Закрыть</button>
+            </div>
         </div>
     </div>
-    <section style="max-width: 900px; margin: 70px auto 0; padding: 0 20px; color: #4a3a3f; line-height: 1.7;">
-        <h2 style="font-size: 28px; margin-bottom: 18px;">Программа для записи клиентов в салон красоты</h2>
-        <p style="margin-bottom: 14px;">Это демонстрационная версия программы для записи клиентов. Система подходит для салонов красоты, парикмахерских, барбершопов и частных мастеров. В демо можно посмотреть календарь, переключение мастеров и создание записей.</p>
-        <p style="margin-bottom: 14px;">Программа помогает вести запись клиентов по времени, распределять нагрузку между мастерами и быстро видеть свободные окна. Интерфейс сделан простым и понятным, без сложной CRM и лишних настроек.</p>
-        <p style="margin-bottom: 14px;">Полная версия предназначена для реальной работы и может быть адаптирована под ваш салон. В демо доступны всплывающие напоминания за 1 час до записи, если страница открыта на ПК.</p>
-        <div style="margin-top: 24px;"><a href="https://vk.com/pashkevich_wtf" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #d4a5b0; color: white; text-decoration: none; padding: 14px 26px; border-radius: 40px; font-weight: 500;">Получить полную версию</a></div>
-    </section>
+    <div class="toast-container" id="toastContainer"></div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
+
 <script>
 (async function() {
-    const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
-    const DEMO_TIMEZONE = 'Asia/Novosibirsk';
-    const DB_STORAGE_KEY = 'salon_db_v25';
-    const SETTINGS_STORAGE_KEY = 'salon_settings_v24';
+    function escapeHtml(text) {
+        if (!text && text !== 0) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    }
+
+    function showToast(message) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('hide');
+            setTimeout(() => toast.remove(), 220);
+        }, 2600);
+    }
+
+    const DB_STORAGE_KEY = 'salon_full_db_v1';
+    const SETTINGS_STORAGE_KEY = 'salon_full_settings_v1';
+    const MIN_APPOINTMENT_INTERVAL_MINUTES = 30;
     const DEMO_MODE = true;
     const DEMO_MAX_APPOINTMENTS = 12;
     const DEMO_MAX_MASTERS = 2;
     const DEMO_ALLOWED_DAY_OFFSET = 1;
-    function getTimeZoneDateString(timeZone = DEMO_TIMEZONE) {
-        const parts = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
-        const map = {};
-        parts.forEach(part => { if (part.type !== 'literal') map[part.type] = part.value; });
-        return `${map.year}-${map.month}-${map.day}`;
+    const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+
+    const colorThemes = {
+        rose: {
+            name: 'Нежная роза', desc: 'Светлые розовые тона', colors: ['#d4a5b0', '#e8d0d6', '#b88997'],
+            settings: {
+                primary: '#d4a5b0', primaryLight: '#e8d0d6', primaryDark: '#b88997',
+                bgMain: '#faf5f6', textPrimary: '#4a3a3f', textSecondary: '#8a7a80',
+                borderLight: '#f0e4e7', calendarText: '#4a3a3f', calendarHeaderText: '#4a3a3f',
+                calendarDayHover: '#e8d0d6', calendarDaySelectedBg: '#d4a5b0', calendarDaySelectedText: '#ffffff',
+                timeSlotText: '#4a3a3f', timeSlotFreeText: '#b88997',
+                headerGradientStart: '#ffffff', headerGradientEnd: '#faf5f6',
+                calendarGradientStart: '#ffffff', calendarGradientEnd: '#faf5f6',
+                panelGradientStart: '#ffffff', panelGradientEnd: '#faf5f6'
+            }
+        },
+        lavender: {
+            name: 'Лаванда', desc: 'Спокойные фиолетовые оттенки', colors: ['#b8b0d9', '#d4cee8', '#9a8fc7'],
+            settings: {
+                primary: '#b8b0d9', primaryLight: '#d4cee8', primaryDark: '#9a8fc7',
+                bgMain: '#f7f5fc', textPrimary: '#3a364a', textSecondary: '#7a7690',
+                borderLight: '#e8e4f0', calendarText: '#3a364a', calendarHeaderText: '#3a364a',
+                calendarDayHover: '#d4cee8', calendarDaySelectedBg: '#b8b0d9', calendarDaySelectedText: '#ffffff',
+                timeSlotText: '#3a364a', timeSlotFreeText: '#9a8fc7',
+                headerGradientStart: '#ffffff', headerGradientEnd: '#f7f5fc',
+                calendarGradientStart: '#ffffff', calendarGradientEnd: '#f7f5fc',
+                panelGradientStart: '#ffffff', panelGradientEnd: '#f7f5fc'
+            }
+        },
+        mint: {
+            name: 'Мятный', desc: 'Свежие зелёные тона', colors: ['#a8d4c4', '#cce8dc', '#8bc0ae'],
+            settings: {
+                primary: '#a8d4c4', primaryLight: '#cce8dc', primaryDark: '#8bc0ae',
+                bgMain: '#f5faf7', textPrimary: '#3a4a42', textSecondary: '#7a9086',
+                borderLight: '#e4f0e8', calendarText: '#3a4a42', calendarHeaderText: '#3a4a42',
+                calendarDayHover: '#cce8dc', calendarDaySelectedBg: '#a8d4c4', calendarDaySelectedText: '#ffffff',
+                timeSlotText: '#3a4a42', timeSlotFreeText: '#8bc0ae',
+                headerGradientStart: '#ffffff', headerGradientEnd: '#f5faf7',
+                calendarGradientStart: '#ffffff', calendarGradientEnd: '#f5faf7',
+                panelGradientStart: '#ffffff', panelGradientEnd: '#f5faf7'
+            }
+        },
+        peach: {
+            name: 'Персиковый', desc: 'Тёплые оранжевые оттенки', colors: ['#e8b89d', '#f0d0be', '#d4a088'],
+            settings: {
+                primary: '#e8b89d', primaryLight: '#f0d0be', primaryDark: '#d4a088',
+                bgMain: '#fdf7f3', textPrimary: '#4a3a32', textSecondary: '#8a7a70',
+                borderLight: '#f0e4dc', calendarText: '#4a3a32', calendarHeaderText: '#4a3a32',
+                calendarDayHover: '#f0d0be', calendarDaySelectedBg: '#e8b89d', calendarDaySelectedText: '#ffffff',
+                timeSlotText: '#4a3a32', timeSlotFreeText: '#d4a088',
+                headerGradientStart: '#ffffff', headerGradientEnd: '#fdf7f3',
+                calendarGradientStart: '#ffffff', calendarGradientEnd: '#fdf7f3',
+                panelGradientStart: '#ffffff', panelGradientEnd: '#fdf7f3'
+            }
+        },
+        sky: {
+            name: 'Небесный', desc: 'Голубые и синие тона', colors: ['#a0c4e2', '#c0daf0', '#88b0d0'],
+            settings: {
+                primary: '#a0c4e2', primaryLight: '#c0daf0', primaryDark: '#88b0d0',
+                bgMain: '#f3f7fc', textPrimary: '#3a4450', textSecondary: '#7a8490',
+                borderLight: '#e0e8f0', calendarText: '#3a4450', calendarHeaderText: '#3a4450',
+                calendarDayHover: '#c0daf0', calendarDaySelectedBg: '#a0c4e2', calendarDaySelectedText: '#ffffff',
+                timeSlotText: '#3a4450', timeSlotFreeText: '#88b0d0',
+                headerGradientStart: '#ffffff', headerGradientEnd: '#f3f7fc',
+                calendarGradientStart: '#ffffff', calendarGradientEnd: '#f3f7fc',
+                panelGradientStart: '#ffffff', panelGradientEnd: '#f3f7fc'
+            }
+        },
+        dark: {
+            name: 'Тёмный', desc: 'Строгий тёмный стиль', colors: ['#6b5b6b', '#8a7a8a', '#4a3a4a'],
+            settings: {
+                primary: '#6b5b6b', primaryLight: '#8a7a8a', primaryDark: '#4a3a4a',
+                bgMain: '#2a242a', textPrimary: '#e0dce0', textSecondary: '#a09ca0',
+                borderLight: '#3a343a', calendarText: '#e0dce0', calendarHeaderText: '#e0dce0',
+                calendarDayHover: '#4a3a4a', calendarDaySelectedBg: '#6b5b6b', calendarDaySelectedText: '#ffffff',
+                timeSlotText: '#e0dce0', timeSlotFreeText: '#8a7a8a',
+                headerGradientStart: '#3a343a', headerGradientEnd: '#2a242a',
+                calendarGradientStart: '#3a343a', calendarGradientEnd: '#2a242a',
+                panelGradientStart: '#3a343a', panelGradientEnd: '#2a242a'
+            }
+        }
+    };
+
+    const defaultSettings = {
+        theme: 'rose',
+        salonName: 'Beauty Space',
+        salonPhone: '',
+        salonAddress: '',
+        borderRadius: 24,
+        borderRadiusSm: 14,
+        bgImage: null,
+        bgImageOpacity: 0.08,
+        layoutMode: 'calendar-left',
+        ...colorThemes.rose.settings
+    };
+
+    let settings = { ...defaultSettings };
+    const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (savedSettings) {
+        try { settings = { ...defaultSettings, ...JSON.parse(savedSettings) }; } catch (e) {}
     }
-    function addDaysToDateString(dateString, days) {
-        const [year, month, day] = dateString.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        date.setDate(date.getDate() + days);
+
+    let currentTheme = settings.theme || 'rose';
+    let masters = [];
+    let appointments = [];
+    let selectedMasterId = '';
+    let selectedDate = getLocalDateString(new Date());
+    let editingAppointmentId = null;
+    let currentReminderText = '';
+    let currentCalendarDate = new Date();
+
+    function getLocalDateString(date = new Date()) {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, '0');
         const d = String(date.getDate()).padStart(2, '0');
         return `${y}-${m}-${d}`;
     }
+
+
+    function addDaysToDateString(dateString, days) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        date.setDate(date.getDate() + days);
+        return getLocalDateString(date);
+    }
+
+    function isAllowedDemoDate(dateStr) {
+        if (!DEMO_MODE) return true;
+        const today = getLocalDateString(new Date());
+        const minDate = addDaysToDateString(today, -DEMO_ALLOWED_DAY_OFFSET);
+        const maxDate = addDaysToDateString(today, DEMO_ALLOWED_DAY_OFFSET);
+        return dateStr >= minDate && dateStr <= maxDate;
+    }
+
+    function getAppointmentsCount() {
+        return appointments.length;
+    }
+
+    function showDemoLimit(message) {
+        alert(message || 'Это ограничение демо-версии. В полной версии ограничений нет.');
+    }
+
     function getDateTimeFromStrings(dateStr, timeStr) {
         const [year, month, day] = dateStr.split('-').map(Number);
         const [hours, minutes] = timeStr.split(':').map(Number);
         return new Date(year, month - 1, day, hours, minutes, 0, 0);
     }
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+
+    function getHourSlot(timeStr) {
+        const hour = String(timeStr || '00:00').split(':')[0].padStart(2, '0');
+        return `${hour}:00`;
     }
-    let db;
-    const savedDB = localStorage.getItem(DB_STORAGE_KEY);
-    db = savedDB ? new SQL.Database(new Uint8Array(JSON.parse(savedDB))) : new SQL.Database();
-    db.run(`CREATE TABLE IF NOT EXISTS masters (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, specialization TEXT DEFAULT 'Мастер')`);
-    db.run(`CREATE TABLE IF NOT EXISTS appointments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        master_id INTEGER,
-        date TEXT,
-        time TEXT,
-        client_name TEXT,
-        phone TEXT,
-        service TEXT,
-        note TEXT DEFAULT '',
-        remind_enabled INTEGER DEFAULT 1,
-        reminded_at TEXT DEFAULT NULL,
-        FOREIGN KEY(master_id) REFERENCES masters(id)
-    )`);
-    try { db.run("ALTER TABLE appointments ADD COLUMN note TEXT DEFAULT ''"); } catch(e) {}
-    try { db.run("ALTER TABLE appointments ADD COLUMN remind_enabled INTEGER DEFAULT 1"); } catch(e) {}
-    try { db.run("ALTER TABLE appointments ADD COLUMN reminded_at TEXT DEFAULT NULL"); } catch(e) {}
-    try { db.run("ALTER TABLE masters ADD COLUMN specialization TEXT DEFAULT 'Мастер'"); } catch(e) {}
-    const mastersCount = db.exec("SELECT COUNT(*) FROM masters");
-    if (mastersCount.length === 0 || mastersCount[0].values[0][0] === 0) {
-        db.run("INSERT INTO masters (name, specialization) VALUES ('Анна', 'Парикмахер'), ('Елена', 'Мастер маникюра'), ('Дарья', 'Визажист')");
+
+    function saveState() {
+        localStorage.setItem(DB_STORAGE_KEY, JSON.stringify({ masters, appointments }));
     }
-    function saveDatabase() {
-        try { localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(Array.from(db.export()))); }
-        catch (err) { console.error(err); alert('Не удалось сохранить данные. Возможно, переполнено локальное хранилище браузера.'); }
+
+    function saveSettings() {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
     }
-    const colorThemes = {
-        rose: { name: 'Нежная роза', desc: 'Светлые розовые тона', colors: ['#d4a5b0','#e8d0d6','#b88997'], settings: { primary:'#d4a5b0', primaryLight:'#e8d0d6', primaryDark:'#b88997', bgMain:'#faf5f6', textPrimary:'#4a3a3f', textSecondary:'#8a7a80', borderLight:'#f0e4e7', calendarText:'#4a3a3f', calendarHeaderText:'#4a3a3f', calendarDayHover:'#e8d0d6', calendarDaySelectedBg:'#d4a5b0', calendarDaySelectedText:'#ffffff', timeSlotText:'#4a3a3f', timeSlotFreeText:'#b88997', headerGradientStart:'#ffffff', headerGradientEnd:'#faf5f6', calendarGradientStart:'#ffffff', calendarGradientEnd:'#faf5f6', panelGradientStart:'#ffffff', panelGradientEnd:'#faf5f6' } },
-        lavender: { name:'Лаванда', desc:'Спокойные фиолетовые оттенки', colors:['#b8b0d9','#d4cee8','#9a8fc7'], settings:{ primary:'#b8b0d9', primaryLight:'#d4cee8', primaryDark:'#9a8fc7', bgMain:'#f7f5fc', textPrimary:'#3a364a', textSecondary:'#7a7690', borderLight:'#e8e4f0', calendarText:'#3a364a', calendarHeaderText:'#3a364a', calendarDayHover:'#d4cee8', calendarDaySelectedBg:'#b8b0d9', calendarDaySelectedText:'#ffffff', timeSlotText:'#3a364a', timeSlotFreeText:'#9a8fc7', headerGradientStart:'#ffffff', headerGradientEnd:'#f7f5fc', calendarGradientStart:'#ffffff', calendarGradientEnd:'#f7f5fc', panelGradientStart:'#ffffff', panelGradientEnd:'#f7f5fc' } },
-        mint: { name:'Мятный', desc:'Свежие зелёные тона', colors:['#a8d4c4','#cce8dc','#8bc0ae'], settings:{ primary:'#a8d4c4', primaryLight:'#cce8dc', primaryDark:'#8bc0ae', bgMain:'#f5faf7', textPrimary:'#3a4a42', textSecondary:'#7a9086', borderLight:'#e4f0e8', calendarText:'#3a4a42', calendarHeaderText:'#3a4a42', calendarDayHover:'#cce8dc', calendarDaySelectedBg:'#a8d4c4', calendarDaySelectedText:'#ffffff', timeSlotText:'#3a4a42', timeSlotFreeText:'#8bc0ae', headerGradientStart:'#ffffff', headerGradientEnd:'#f5faf7', calendarGradientStart:'#ffffff', calendarGradientEnd:'#f5faf7', panelGradientStart:'#ffffff', panelGradientEnd:'#f5faf7' } },
-        peach: { name:'Персиковый', desc:'Тёплые оранжевые оттенки', colors:['#e8b89d','#f0d0be','#d4a088'], settings:{ primary:'#e8b89d', primaryLight:'#f0d0be', primaryDark:'#d4a088', bgMain:'#fdf7f3', textPrimary:'#4a3a32', textSecondary:'#8a7a70', borderLight:'#f0e4dc', calendarText:'#4a3a32', calendarHeaderText:'#4a3a32', calendarDayHover:'#f0d0be', calendarDaySelectedBg:'#e8b89d', calendarDaySelectedText:'#ffffff', timeSlotText:'#4a3a32', timeSlotFreeText:'#d4a088', headerGradientStart:'#ffffff', headerGradientEnd:'#fdf7f3', calendarGradientStart:'#ffffff', calendarGradientEnd:'#fdf7f3', panelGradientStart:'#ffffff', panelGradientEnd:'#fdf7f3' } },
-        sky: { name:'Небесный', desc:'Голубые и синие тона', colors:['#a0c4e2','#c0daf0','#88b0d0'], settings:{ primary:'#a0c4e2', primaryLight:'#c0daf0', primaryDark:'#88b0d0', bgMain:'#f3f7fc', textPrimary:'#3a4450', textSecondary:'#7a8490', borderLight:'#e0e8f0', calendarText:'#3a4450', calendarHeaderText:'#3a4450', calendarDayHover:'#c0daf0', calendarDaySelectedBg:'#a0c4e2', calendarDaySelectedText:'#ffffff', timeSlotText:'#3a4450', timeSlotFreeText:'#88b0d0', headerGradientStart:'#ffffff', headerGradientEnd:'#f3f7fc', calendarGradientStart:'#ffffff', calendarGradientEnd:'#f3f7fc', panelGradientStart:'#ffffff', panelGradientEnd:'#f3f7fc' } },
-        dark: { name:'Тёмный', desc:'Строгий тёмный стиль', colors:['#6b5b6b','#8a7a8a','#4a3a4a'], settings:{ primary:'#6b5b6b', primaryLight:'#8a7a8a', primaryDark:'#4a3a4a', bgMain:'#2a242a', textPrimary:'#e0dce0', textSecondary:'#a09ca0', borderLight:'#3a343a', calendarText:'#e0dce0', calendarHeaderText:'#e0dce0', calendarDayHover:'#4a3a4a', calendarDaySelectedBg:'#6b5b6b', calendarDaySelectedText:'#ffffff', timeSlotText:'#e0dce0', timeSlotFreeText:'#8a7a8a', headerGradientStart:'#3a343a', headerGradientEnd:'#2a242a', calendarGradientStart:'#3a343a', calendarGradientEnd:'#2a242a', panelGradientStart:'#3a343a', panelGradientEnd:'#2a242a' } }
-    };
-    const defaultSettings = { theme:'rose', salonName:'Beauty Space', salonPhone:'', salonAddress:'', borderRadius:24, borderRadiusSm:14, bgImage:null, bgImageOpacity:0.08, ...colorThemes.rose.settings };
-    let settings = { ...defaultSettings };
-    const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (savedSettings) {
-        try { settings = { ...defaultSettings, ...JSON.parse(savedSettings) }; } catch (err) { console.error(err); }
+
+    function loadState() {
+        const raw = localStorage.getItem(DB_STORAGE_KEY);
+        if (raw) {
+            try {
+                const data = JSON.parse(raw);
+                masters = Array.isArray(data.masters) ? data.masters : [];
+                appointments = Array.isArray(data.appointments) ? data.appointments : [];
+            } catch (e) {
+                masters = [];
+                appointments = [];
+            }
+        }
+        if (masters.length === 0) {
+            masters = [
+                { id: 1, name: 'Анна', specialization: 'Парикмахер' },
+                { id: 2, name: 'Елена', specialization: 'Мастер маникюра' },
+                { id: 3, name: 'Дарья', specialization: 'Визажист' }
+            ];
+        }
     }
-    function saveSettingsToStorage() {
-        try { localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings)); }
-        catch (err) { console.error(err); alert('Не удалось сохранить настройки. Возможно, фоновое изображение слишком большое.'); }
+
+
+    function getClientStats(phone) {
+        const normalized = String(phone || '').trim();
+        const apps = appointments.filter(a => String(a.phone || '').trim() === normalized)
+            .sort((a,b) => getDateTimeFromStrings(b.date, b.time) - getDateTimeFromStrings(a.date, a.time));
+        return {
+            totalVisits: apps.length,
+            lastVisit: apps.length ? `${apps[0].date} ${apps[0].time}` : '',
+            history: apps.slice(0, 5)
+        };
     }
-    let currentTheme = settings.theme || 'rose';
-    let selectedMasterId = '';
-    let masters = [];
-    let selectedDate = getTimeZoneDateString();
-    let currentReminderText = '';
-    const timeSlots = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
-    function getAppointmentsCount() {
-        const result = db.exec('SELECT COUNT(*) FROM appointments');
-        return result?.[0]?.values?.[0]?.[0] || 0;
+
+    function getClientsBase() {
+        const map = new Map();
+        appointments.forEach(app => {
+            const phone = String(app.phone || '').trim();
+            if (!phone) return;
+            const stats = getClientStats(phone);
+            map.set(phone, {
+                name: app.client_name,
+                phone,
+                totalVisits: stats.totalVisits,
+                lastVisit: stats.lastVisit,
+                history: stats.history
+            });
+        });
+        return Array.from(map.values()).sort((a,b) => (b.lastVisit || '').localeCompare(a.lastVisit || ''));
     }
-    function isAllowedDemoDate(dateStr) {
-        if (!DEMO_MODE) return true;
-        const todayStr = getTimeZoneDateString();
-        const todayDate = getDateTimeFromStrings(todayStr, '00:00');
-        const targetDate = getDateTimeFromStrings(dateStr, '00:00');
-        const diffDays = Math.round((targetDate - todayDate) / 86400000);
-        return diffDays >= -DEMO_ALLOWED_DAY_OFFSET && diffDays <= DEMO_ALLOWED_DAY_OFFSET;
-    }
-    function showDemoLimit(message) { alert(message || 'Это ограничение демо-версии. Для полной версии свяжитесь с нами.'); }
+
     function applySettings(s) {
         const root = document.documentElement;
         root.style.setProperty('--primary', s.primary);
@@ -610,6 +1837,7 @@
         root.style.setProperty('--calendar-day-selected-text', s.calendarDaySelectedText);
         root.style.setProperty('--time-slot-text', s.timeSlotText);
         root.style.setProperty('--time-slot-free-text', s.timeSlotFreeText);
+
         const bgLayer = document.getElementById('bgImageLayer');
         if (s.bgImage) {
             bgLayer.style.backgroundImage = `url(${s.bgImage})`;
@@ -621,14 +1849,30 @@
             bgLayer.style.opacity = s.bgImageOpacity;
             document.getElementById('imagePreview').style.display = 'none';
         }
+
         document.getElementById('salonNameDisplay').textContent = s.salonName;
         const phoneDisplay = document.getElementById('headerPhoneDisplay');
         const addressDisplay = document.getElementById('headerAddressDisplay');
         const separator = document.querySelector('.header-contact-separator');
-        if (s.salonPhone) { phoneDisplay.textContent = s.salonPhone; phoneDisplay.style.display = 'flex'; } else { phoneDisplay.style.display = 'none'; }
-        if (s.salonAddress) { addressDisplay.textContent = s.salonAddress; addressDisplay.style.display = 'flex'; } else { addressDisplay.style.display = 'none'; }
+        const contactsBlock = document.getElementById('headerContacts');
+
+        if (s.salonPhone) {
+            phoneDisplay.textContent = s.salonPhone;
+            phoneDisplay.style.display = 'flex';
+        } else {
+            phoneDisplay.style.display = 'none';
+        }
+
+        if (s.salonAddress) {
+            addressDisplay.textContent = s.salonAddress;
+            addressDisplay.style.display = 'flex';
+        } else {
+            addressDisplay.style.display = 'none';
+        }
+
         separator.style.display = s.salonPhone && s.salonAddress ? 'block' : 'none';
-        document.getElementById('headerContacts').style.display = (!s.salonPhone && !s.salonAddress) ? 'none' : 'flex';
+        contactsBlock.style.display = (!s.salonPhone && !s.salonAddress) ? 'none' : 'flex';
+
         document.getElementById('settingSalonName').value = s.salonName;
         document.getElementById('settingSalonPhone').value = s.salonPhone || '';
         document.getElementById('settingSalonAddress').value = s.salonAddress || '';
@@ -638,214 +1882,522 @@
         document.getElementById('borderRadiusSmValue').textContent = s.borderRadiusSm + 'px';
         document.getElementById('settingBgOpacity').value = s.bgImageOpacity;
         document.getElementById('opacityValue').textContent = Number(s.bgImageOpacity).toFixed(2);
+
+        const mainLayout = document.getElementById('mainLayout');
+        if (mainLayout) {
+            mainLayout.classList.toggle('layout-swapped', s.layoutMode === 'calendar-right');
+        }
+
+        document.querySelectorAll('.layout-option').forEach(option => {
+            option.classList.toggle('active', option.dataset.layout === (s.layoutMode || 'calendar-left'));
+        });
     }
+
     function renderThemeGrid() {
         const grid = document.getElementById('themeGrid');
         let html = '';
         for (const [key, theme] of Object.entries(colorThemes)) {
             const active = key === currentTheme ? 'active' : '';
-            const colorsHtml = theme.colors.map(c => `<div class="theme-color" style="background: ${c};"></div>`).join('');
-            html += `<div class="theme-card ${active}" data-theme="${key}"><div class="theme-preview">${colorsHtml}</div><div class="theme-name">${theme.name}</div><div class="theme-desc">${theme.desc}</div></div>`;
+            const colorsHtml = theme.colors.map(c => `<div class="theme-color" style="background:${c};"></div>`).join('');
+            html += `
+                <div class="theme-card ${active}" data-theme="${key}">
+                    <div class="theme-preview">${colorsHtml}</div>
+                    <div class="theme-name">${theme.name}</div>
+                    <div class="theme-desc">${theme.desc}</div>
+                </div>
+            `;
         }
         grid.innerHTML = html;
+
         document.querySelectorAll('.theme-card').forEach(card => {
-            card.addEventListener('click', function() {
+            card.addEventListener('click', () => {
                 document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                currentTheme = this.dataset.theme;
+                card.classList.add('active');
+                currentTheme = card.dataset.theme;
                 settings = { ...settings, ...colorThemes[currentTheme].settings, theme: currentTheme };
                 applySettings(settings);
                 renderSchedule();
             });
         });
     }
-    function loadMasters() {
-        const result = db.exec("SELECT id, name, specialization FROM masters ORDER BY name");
-        masters = result.length > 0 ? result[0].values.map(row => ({ id: row[0], name: row[1], specialization: row[2] || 'Мастер' })) : [];
-        if (DEMO_MODE) masters = masters.slice(0, DEMO_MAX_MASTERS);
-        const filterSelect = document.getElementById('masterFilterSelect');
-        filterSelect.innerHTML = '<option value="">Все мастера</option>';
-        masters.forEach(m => {
-            const option = document.createElement('option');
-            option.value = m.id; option.textContent = `${m.name} (${m.specialization})`; filterSelect.appendChild(option);
-        });
-        filterSelect.value = selectedMasterId;
-        const modalSelect = document.getElementById('modalAppointmentMaster');
-        modalSelect.innerHTML = '<option value="">Выберите мастера</option>';
-        masters.forEach(m => {
-            const option = document.createElement('option');
-            option.value = m.id; option.textContent = `${m.name} (${m.specialization})`; modalSelect.appendChild(option);
-        });
-        renderMastersList();
-    }
+
     function renderMastersList() {
         const container = document.getElementById('mastersListSettings');
-        if (masters.length === 0) { container.innerHTML = '<div style="padding:20px; text-align:center; color:#b5a5aa;">Нет мастеров</div>'; return; }
-        container.innerHTML = masters.map(m => `
+        const visibleMasters = DEMO_MODE ? masters.slice(0, DEMO_MAX_MASTERS) : masters;
+        if (visibleMasters.length === 0) {
+            container.innerHTML = '<div style="padding:20px; text-align:center; color:#b5a5aa;">Нет мастеров</div>';
+            return;
+        }
+
+        container.innerHTML = visibleMasters.map(m => `
             <div class="master-item" data-id="${m.id}">
-                <div class="master-item-info"><span class="master-item-name">${escapeHtml(m.name)}</span><span class="master-item-specialization">${escapeHtml(m.specialization)}</span></div>
-                <div class="master-item-actions"><button class="icon-btn edit-master-btn" data-id="${m.id}" data-name="${escapeHtml(m.name)}" data-spec="${escapeHtml(m.specialization)}">Изменить</button><button class="icon-btn delete delete-master-btn" data-id="${m.id}">Удалить</button></div>
-            </div>`).join('');
-        container.querySelectorAll('.edit-master-btn').forEach(btn => btn.addEventListener('click', () => editMaster(btn.dataset.id, btn.dataset.name, btn.dataset.spec)));
-        container.querySelectorAll('.delete-master-btn').forEach(btn => btn.addEventListener('click', () => deleteMaster(btn.dataset.id)));
+                <div class="master-item-info">
+                    <span class="master-item-name">${escapeHtml(m.name)}</span>
+                    <span class="master-item-specialization">${escapeHtml(m.specialization)}</span>
+                </div>
+                <div class="master-item-actions">
+                    <button class="icon-btn edit-master-btn" data-id="${m.id}">Изменить</button>
+                    <button class="icon-btn delete delete-master-btn" data-id="${m.id}">Удалить</button>
+                </div>
+            </div>
+        `).join('');
+
+        container.querySelectorAll('.edit-master-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number(btn.dataset.id);
+                const master = masters.find(m => m.id === id);
+                if (!master) return;
+                const newName = prompt('Введите новое имя мастера', master.name);
+                if (newName === null) return;
+                const newSpec = prompt('Введите специализацию мастера', master.specialization);
+                if (newSpec === null) return;
+
+                const normalized = newName.trim();
+                const spec = newSpec.trim();
+                if (!normalized || !spec) return;
+
+                const duplicate = masters.find(m => m.id !== id && m.name.toLowerCase() === normalized.toLowerCase());
+                if (duplicate) {
+                    alert('Мастер с таким именем уже существует');
+                    return;
+                }
+
+                master.name = normalized;
+                master.specialization = spec;
+                saveState();
+                loadMastersIntoSelects();
+                renderSchedule();
+            });
+        });
+
+        container.querySelectorAll('.delete-master-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number(btn.dataset.id);
+                if (!confirm('Удалить мастера и все его записи?')) return;
+                masters = masters.filter(m => m.id !== id);
+                appointments = appointments.filter(a => a.master_id !== id);
+                if (String(selectedMasterId) === String(id)) selectedMasterId = '';
+                saveState();
+                loadMastersIntoSelects();
+                renderSchedule();
+            });
+        });
     }
-    function editMaster(id, currentName, currentSpec) {
-        const newName = prompt('Введите новое имя мастера', currentName); if (newName === null) return;
-        const newSpec = prompt('Введите специализацию мастера', currentSpec); if (newSpec === null) return;
-        if (newName.trim() && newSpec.trim()) {
-            try { db.run("UPDATE masters SET name = ?, specialization = ? WHERE id = ?", [newName.trim(), newSpec.trim(), id]); saveDatabase(); loadMasters(); renderSchedule(); }
-            catch (e) { alert('Мастер с таким именем уже существует'); }
+
+
+    function renderClientsList(searchText = '') {
+        const container = document.getElementById('clientsList');
+        const q = searchText.trim().toLowerCase();
+        let clients = getClientsBase();
+        if (q) {
+            clients = clients.filter(c =>
+                c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q)
+            );
+        }
+
+        if (clients.length === 0) {
+            container.innerHTML = '<div style="padding:20px; text-align:center; color:#b5a5aa;">Нет клиентов</div>';
+            return;
+        }
+
+        container.innerHTML = clients.map(client => `
+            <div class="client-item">
+                <div class="client-item-info">
+                    <span class="client-item-name">${escapeHtml(client.name)}</span>
+                    <span class="client-item-meta">📞 ${escapeHtml(client.phone)}</span>
+                    <span class="client-item-tag">Посещений: ${client.totalVisits}</span>
+                    <span class="client-item-meta">Последний визит: ${escapeHtml(client.lastVisit || '—')}</span>
+                    <div class="client-history">
+                        ${client.history.length ? client.history.map(h => `${escapeHtml(h.date)} ${escapeHtml(h.time)} — ${escapeHtml(h.service)} (${(Number(h.price)||0).toLocaleString('ru-RU')} ₽)`).join('<br>') : 'История пуста'}
+                    </div>
+                </div>
+                <div class="client-item-actions">
+                    <button class="icon-btn repeat-client-btn" data-phone="${escapeHtml(client.phone)}">Записать снова</button>
+                </div>
+            </div>
+        `).join('');
+
+        container.querySelectorAll('.repeat-client-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const phone = btn.dataset.phone;
+                const clientApps = appointments.filter(a => String(a.phone).trim() === String(phone).trim())
+                    .sort((a,b) => getDateTimeFromStrings(b.date, b.time) - getDateTimeFromStrings(a.date, a.time));
+                if (!clientApps.length) return;
+                const last = clientApps[0];
+                resetModalForm();
+                document.getElementById('modalAppointmentClient').value = last.client_name;
+                document.getElementById('modalAppointmentPhone').value = last.phone;
+                document.getElementById('modalAppointmentService').value = last.service;
+                document.getElementById('modalAppointmentPrice').value = last.price || 0;
+                document.getElementById('modalAppointmentMaster').value = String(last.master_id);
+                document.getElementById('clientsModal').style.display = 'none';
+                document.getElementById('appointmentModal').style.display = 'flex';
+            });
+        });
+    }
+
+    function loadMastersIntoSelects() {
+        const filterSelect = document.getElementById('masterFilterSelect');
+        filterSelect.innerHTML = '<option value="">Все мастера</option>';
+        const visibleMasters = DEMO_MODE ? masters.slice(0, DEMO_MAX_MASTERS) : masters;
+        visibleMasters.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.id;
+            option.textContent = `${m.name} (${m.specialization})`;
+            filterSelect.appendChild(option);
+        });
+        filterSelect.value = selectedMasterId;
+
+        const modalSelect = document.getElementById('modalAppointmentMaster');
+        modalSelect.innerHTML = '<option value="">Выберите мастера</option>';
+        visibleMasters.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.id;
+            option.textContent = `${m.name} (${m.specialization})`;
+            modalSelect.appendChild(option);
+        });
+
+        renderMastersList();
+    }
+
+    function renderCalendar() {
+        const monthLabel = document.getElementById('calendarMonthLabel');
+        const daysContainer = document.getElementById('calendarDays');
+        const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+        monthLabel.textContent = `${months[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+        daysContainer.innerHTML = '';
+
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+
+        let firstWeekday = firstDay.getDay();
+        if (firstWeekday === 0) firstWeekday = 7;
+
+        for (let i = 1; i < firstWeekday; i++) {
+            const empty = document.createElement('button');
+            empty.className = 'calendar-day empty';
+            empty.type = 'button';
+            daysContainer.appendChild(empty);
+        }
+
+        const today = getLocalDateString(new Date());
+
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const dateObj = new Date(year, month, day);
+            const dateStr = getLocalDateString(dateObj);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'calendar-day';
+            if (dateStr === selectedDate) btn.classList.add('selected');
+            if (dateStr === today) btn.classList.add('today');
+            if (getDateTimeFromStrings(dateStr, '00:00') < getDateTimeFromStrings(today, '00:00')) btn.classList.add('past-day');
+            btn.textContent = day;
+            btn.addEventListener('click', () => {
+                if (DEMO_MODE && !isAllowedDemoDate(dateStr)) {
+                    showDemoLimit('В демо доступны только вчера, сегодня и завтра.');
+                    return;
+                }
+                selectedDate = dateStr;
+                renderCalendar();
+                renderSchedule();
+            });
+            daysContainer.appendChild(btn);
         }
     }
-    function deleteMaster(id) {
-        if (!confirm('Удалить мастера и все его записи?')) return;
-        db.run("DELETE FROM appointments WHERE master_id = ?", [id]);
-        db.run("DELETE FROM masters WHERE id = ?", [id]);
-        saveDatabase();
-        if (selectedMasterId == id) selectedMasterId = '';
-        loadMasters();
-        document.getElementById('masterFilterSelect').value = selectedMasterId;
-        renderSchedule();
-    }
+
     function updateDateDisplay() {
         const [year, month, day] = selectedDate.split('-').map(Number);
         const d = new Date(year, month - 1, day);
-        const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-        const weekdays = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+        const weekdays = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+
         document.getElementById('selectedDateDisplay').textContent = `${d.getDate()} ${months[d.getMonth()]}, ${weekdays[d.getDay()]}`;
+
         let masterName = 'Все мастера';
         if (selectedMasterId) {
             const master = masters.find(m => String(m.id) === String(selectedMasterId));
             masterName = master ? master.name : 'Все мастера';
         }
+
         document.getElementById('selectedMasterDisplay').textContent = masterName;
         document.getElementById('scheduleTitle').textContent = `Записи на ${d.getDate()} ${months[d.getMonth()]}`;
-        document.getElementById('modalSelectedDate').value = selectedDate;
     }
+
+    function getAppointmentsForSelectedDate() {
+        return appointments
+            .filter(a => a.date === selectedDate && (!selectedMasterId || String(a.master_id) === String(selectedMasterId)))
+            .sort((a, b) => a.time.localeCompare(b.time));
+    }
+
+    function renderSummaryStats(dayAppointments) {
+        const totalIncome = dayAppointments.reduce((sum, a) => sum + (Number(a.price) || 0), 0);
+        document.getElementById('incomeValue').textContent = `${totalIncome.toLocaleString('ru-RU')} ₽`;
+
+        const masterLoadList = document.getElementById('masterLoadList');
+        const allMasters = selectedMasterId ? masters.filter(m => String(m.id) === String(selectedMasterId)) : masters;
+
+        if (allMasters.length === 0) {
+            masterLoadList.innerHTML = '<div style="font-size:13px; color: var(--text-light);">Нет мастеров</div>';
+            return;
+        }
+
+        masterLoadList.innerHTML = allMasters.map(master => {
+            const count = appointments.filter(a => a.date === selectedDate && String(a.master_id) === String(master.id)).length;
+            const percent = Math.min(100, Math.round((count / timeSlots.length) * 100));
+            return `
+                <div class="master-load-item">
+                    <div class="master-load-head">
+                        <span class="master-load-name">${escapeHtml(master.name)}</span>
+                        <span class="master-load-meta">${count} записей • ${percent}%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width:${percent}%"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function isUpcomingSoon(app) {
+        const now = new Date();
+        const appointmentDate = getDateTimeFromStrings(app.date, app.time);
+        const diffMinutes = Math.floor((appointmentDate - now) / 60000);
+        return diffMinutes >= 0 && diffMinutes <= 60;
+    }
+
+
+    function getAppointmentMinutes(app) {
+        const [hours, minutes] = String(app.time || '00:00').split(':').map(Number);
+        return (hours || 0) * 60 + (minutes || 0);
+    }
+
+    function findCloseTimeConflict({ id, masterId, date, time }) {
+        const [hours, minutes] = String(time || '00:00').split(':').map(Number);
+        const newMinutes = (hours || 0) * 60 + (minutes || 0);
+
+        return appointments.find(a => {
+            if (a.id === id) return false;
+            if (String(a.master_id) !== String(masterId)) return false;
+            if (a.date !== date) return false;
+
+            const existingMinutes = getAppointmentMinutes(a);
+            return Math.abs(existingMinutes - newMinutes) < MIN_APPOINTMENT_INTERVAL_MINUTES;
+        });
+    }
+
     function renderSchedule() {
         updateDateDisplay();
         const container = document.getElementById('timeGrid');
-        let query = `SELECT a.*, m.name as master_name, m.specialization as master_specialization FROM appointments a JOIN masters m ON a.master_id = m.id WHERE a.date = ?`;
-        const params = [selectedDate];
-        if (selectedMasterId) { query += ' AND a.master_id = ?'; params.push(selectedMasterId); }
-        query += ' ORDER BY a.time';
-        const stmt = db.prepare(query); stmt.bind(params);
-        const appointments = []; while (stmt.step()) appointments.push(stmt.getAsObject()); stmt.free();
-        const byTime = {}; timeSlots.forEach(t => byTime[t] = []); appointments.forEach(a => { if (byTime[a.time]) byTime[a.time].push(a); });
+        const dayAppointments = getAppointmentsForSelectedDate();
+
+        const byTime = {};
+        const displaySlotsSet = new Set(timeSlots);
+        dayAppointments.forEach(app => displaySlotsSet.add(getHourSlot(app.time)));
+        const displaySlots = Array.from(displaySlotsSet).sort((a, b) => a.localeCompare(b));
+        displaySlots.forEach(t => byTime[t] = []);
+        dayAppointments.forEach(app => {
+            const slot = getHourSlot(app.time);
+            if (!byTime[slot]) byTime[slot] = [];
+            byTime[slot].push(app);
+        });
+        Object.keys(byTime).forEach(slot => {
+            byTime[slot].sort((a, b) => a.time.localeCompare(b.time));
+        });
+
+        let totalIncome = 0;
+        const masterStats = {};
+        dayAppointments.forEach(app => {
+            totalIncome += Number(app.price) || 0;
+            const master = masters.find(m => String(m.id) === String(app.master_id));
+            const key = master ? master.name : 'Без мастера';
+            masterStats[key] = (masterStats[key] || 0) + 1;
+        });
+
+        let statsHtml = `<strong>Доход за день:</strong> ${totalIncome.toLocaleString('ru-RU')} ₽`;
+        const masterStatsParts = Object.entries(masterStats).map(([master, count]) => `${master}: ${count} записей`);
+        if (masterStatsParts.length) statsHtml += `<br>${masterStatsParts.join('<br>')}`;
+        document.getElementById('statsBlock').innerHTML = statsHtml;
+
         let html = '';
-        timeSlots.forEach(time => {
+        displaySlots.forEach(time => {
             const slotApps = byTime[time] || [];
             if (slotApps.length === 0) {
-                html += `<div class="time-row"><span class="time-label">${time}</span><div class="appointment-info"><span class="free-slot-indicator">свободно</span></div></div>`;
+                html += `
+                    <div class="time-row">
+                        <span class="time-label">${time}</span>
+                        <div class="appointment-info">
+                            <span class="free-slot-indicator">свободно</span>
+                            <div class="appointment-actions">
+                                <button class="icon-btn create-at-time-btn" data-time="${time}" title="Создать запись на ${time}">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
             } else {
                 slotApps.forEach(app => {
+                    const master = masters.find(m => String(m.id) === String(app.master_id));
                     const noteHtml = app.note ? `<span class="appointment-note">${escapeHtml(app.note)}</span>` : '';
-                    const reminderHtml = Number(app.remind_enabled) === 1 ? `<span class="appointment-reminder">${app.reminded_at ? 'напоминание уже показано' : 'напомнить за 1 час'}</span>` : '';
+                    const clientStats = getClientStats(app.phone);
+                    const visitsHtml = clientStats.totalVisits ? `<span class="appointment-visits">визитов: ${clientStats.totalVisits}</span>` : '';
+                    const reminderStateHtml = app.remind_enabled
+                        ? `<span class="appointment-reminder-state">${app.reminded_at ? 'напоминание показано' : 'напомнить за 1 час'}</span>`
+                        : '';
                     html += `
                         <div class="time-row has-appointment">
                             <span class="time-label">${time}</span>
                             <div class="appointment-info">
                                 <div class="appointment-details">
+                                    <span class="appointment-exact-time">${escapeHtml(app.time)}</span>
                                     <span class="appointment-client">${escapeHtml(app.client_name)}</span>
                                     <span class="appointment-service">${escapeHtml(app.service)}</span>
-                                    <span class="appointment-master">${escapeHtml(app.master_name)} — ${escapeHtml(app.master_specialization || 'Мастер')}</span>
+                                    <span class="appointment-master">${escapeHtml(master ? master.name : '')} — ${escapeHtml(master ? master.specialization : '')}</span>
                                     <span class="appointment-phone">${escapeHtml(app.phone)}</span>
+                                    <span class="appointment-price">${(Number(app.price) || 0).toLocaleString('ru-RU')} ₽</span>
+                                    ${visitsHtml}
+                                    ${reminderStateHtml}
                                     ${noteHtml}
-                                    ${reminderHtml}
                                 </div>
                                 <div class="appointment-actions">
                                     <button class="icon-btn edit-btn" data-id="${app.id}">Изменить</button>
-                                    <button class="icon-btn copy-reminder-btn" data-id="${app.id}">Текст</button>
-                                    <button class="icon-btn delete delete-appointment-btn" data-id="${app.id}">Удалить</button>
+                                    <button class="icon-btn copy-btn" data-id="${app.id}">Текст</button>
+                                    <button class="icon-btn delete delete-btn" data-id="${app.id}">Удалить</button>
+                                    <button class="icon-btn create-at-time-btn" data-time="${time}" title="Добавить ещё запись на ${time}">+</button>
                                 </div>
                             </div>
-                        </div>`;
+                        </div>
+                    `;
                 });
             }
         });
+
         container.innerHTML = html || '<div class="empty-state">Нет записей на эту дату</div>';
-        container.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openEditModal(btn.dataset.id)));
-        container.querySelectorAll('.delete-appointment-btn').forEach(btn => btn.addEventListener('click', () => deleteAppointment(btn.dataset.id)));
-        container.querySelectorAll('.copy-reminder-btn').forEach(btn => btn.addEventListener('click', () => copyReminderTextById(btn.dataset.id)));
+
+        container.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => openEditModal(Number(btn.dataset.id)));
+        });
+
+        container.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteAppointment(Number(btn.dataset.id)));
+        });
+
+        container.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => copyReminderTextById(Number(btn.dataset.id)));
+        });
+
+        container.querySelectorAll('.create-at-time-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                resetModalForm();
+                document.getElementById('modalAppointmentDate').value = selectedDate;
+                document.getElementById('modalAppointmentTime').value = btn.dataset.time;
+                document.getElementById('modalAppointmentMaster').value = selectedMasterId || '';
+                document.getElementById('appointmentModal').style.display = 'flex';
+            });
+        });
+
+        renderSummaryStats(dayAppointments);
     }
+
     function openEditModal(id) {
-        const stmt = db.prepare("SELECT * FROM appointments WHERE id = ?"); stmt.bind([id]);
-        let app = null; if (stmt.step()) app = stmt.getAsObject(); stmt.free();
+        const app = appointments.find(a => a.id === id);
         if (!app) return;
-        document.getElementById('editAppointmentId').value = id;
+
+        editingAppointmentId = id;
         document.getElementById('modalTitle').textContent = 'Редактирование записи';
         document.getElementById('modalSaveBtn').textContent = 'Сохранить изменения';
+
+        document.getElementById('modalAppointmentDate').value = app.date;
         document.getElementById('modalAppointmentTime').value = app.time;
         document.getElementById('modalAppointmentMaster').value = String(app.master_id);
+        document.getElementById('modalAppointmentPrice').value = app.price || 0;
         document.getElementById('modalAppointmentClient').value = app.client_name;
         document.getElementById('modalAppointmentPhone').value = app.phone;
         document.getElementById('modalAppointmentService').value = app.service;
         document.getElementById('modalAppointmentNote').value = app.note || '';
-        document.getElementById('modalAppointmentRemind').checked = Number(app.remind_enabled ?? 1) === 1;
+        document.getElementById('modalAppointmentRemind').checked = Boolean(app.remind_enabled);
         document.getElementById('appointmentModal').style.display = 'flex';
     }
+
     function deleteAppointment(id) {
         if (!confirm('Удалить эту запись?')) return;
-        db.run("DELETE FROM appointments WHERE id = ?", [id]);
-        saveDatabase();
+        appointments = appointments.filter(a => a.id !== id);
+        saveState();
         renderSchedule();
+        showToast('Запись удалена');
     }
+
     function resetModalForm() {
-        document.getElementById('editAppointmentId').value = '';
+        editingAppointmentId = null;
         document.getElementById('modalTitle').textContent = 'Новая запись';
         document.getElementById('modalSaveBtn').textContent = 'Создать запись';
+        document.getElementById('modalAppointmentDate').value = selectedDate;
         document.getElementById('modalAppointmentTime').value = '10:00';
         document.getElementById('modalAppointmentMaster').value = selectedMasterId || '';
+        document.getElementById('modalAppointmentPrice').value = '';
         document.getElementById('modalAppointmentClient').value = '';
         document.getElementById('modalAppointmentPhone').value = '';
         document.getElementById('modalAppointmentService').value = '';
         document.getElementById('modalAppointmentNote').value = '';
         document.getElementById('modalAppointmentRemind').checked = true;
     }
-    function getReminderText(app) {
-        return `Здравствуйте! Напоминаем, что вы записаны на ${app.date} в ${app.time}. Мастер: ${app.master_name}. Услуга: ${app.service}. Ждём вас!`;
+
+    function buildReminderText(app) {
+        const master = masters.find(m => String(m.id) === String(app.master_id));
+        const pricePart = app.price ? ` Цена: ${(Number(app.price) || 0).toLocaleString('ru-RU')} ₽.` : '';
+        return `Здравствуйте! Напоминаем, что вы записаны на ${app.date} в ${app.time}. Мастер: ${master ? master.name : ''}. Услуга: ${app.service}.${pricePart} Ждём вас!`;
     }
+
     function copyReminderTextById(id) {
-        const stmt = db.prepare(`SELECT a.*, m.name as master_name FROM appointments a JOIN masters m ON a.master_id = m.id WHERE a.id = ?`);
-        stmt.bind([id]);
-        let app = null; if (stmt.step()) app = stmt.getAsObject(); stmt.free();
+        const app = appointments.find(a => a.id === id);
         if (!app) return;
-        const text = getReminderText(app);
-        navigator.clipboard.writeText(text).then(() => alert('Текст напоминания скопирован')).catch(() => alert('Не удалось скопировать текст'));
+        const text = buildReminderText(app);
+        navigator.clipboard.writeText(text)
+            .then(() => showToast('Текст напоминания скопирован'))
+            .catch(() => showToast('Не удалось скопировать текст'));
     }
+
     function openReminderModal(app) {
-        currentReminderText = getReminderText(app);
-        const content = document.getElementById('reminderContent');
-        content.innerHTML = `
+        currentReminderText = buildReminderText(app);
+        const master = masters.find(m => String(m.id) === String(app.master_id));
+        document.getElementById('reminderContent').innerHTML = `
             <p><strong>Клиент:</strong> ${escapeHtml(app.client_name)}</p>
             <p><strong>Телефон:</strong> ${escapeHtml(app.phone)}</p>
             <p><strong>Дата и время:</strong> ${escapeHtml(app.date)} ${escapeHtml(app.time)}</p>
-            <p><strong>Мастер:</strong> ${escapeHtml(app.master_name)}</p>
+            <p><strong>Мастер:</strong> ${escapeHtml(master ? master.name : '')}</p>
             <p><strong>Услуга:</strong> ${escapeHtml(app.service)}</p>
-            <div class="reminder-status-box"><div style="font-size:12px; color:#8a7a80; margin-bottom:6px;">Текст напоминания</div><div>${escapeHtml(currentReminderText)}</div></div>`;
+            <p><strong>Цена:</strong> ${(Number(app.price) || 0).toLocaleString('ru-RU')} ₽</p>
+            <div style="margin-top:16px; padding:14px; background:#faf5f6; border-radius:14px; border:1px solid #f0e4e7;">
+                <div style="font-size:12px; color:#8a7a80; margin-bottom:6px;">Текст напоминания</div>
+                <div>${escapeHtml(currentReminderText)}</div>
+            </div>
+        `;
         document.getElementById('reminderModal').style.display = 'flex';
     }
-    function markReminderShown(appointmentId) {
-        db.run("UPDATE appointments SET reminded_at = ? WHERE id = ?", [new Date().toISOString(), appointmentId]);
-        saveDatabase();
-    }
+
     function checkUpcomingReminders() {
         const now = new Date();
-        const stmt = db.prepare(`SELECT a.*, m.name as master_name FROM appointments a JOIN masters m ON a.master_id = m.id WHERE a.remind_enabled = 1 AND a.reminded_at IS NULL`);
         let reminderToShow = null;
-        while (stmt.step()) {
-            const app = stmt.getAsObject();
+
+        for (const app of appointments) {
+            if (!app.remind_enabled || app.reminded_at) continue;
             const appointmentDate = getDateTimeFromStrings(app.date, app.time);
             const diffMinutes = Math.floor((appointmentDate - now) / 60000);
-            if (diffMinutes >= 0 && diffMinutes <= 60) { reminderToShow = app; break; }
+            if (diffMinutes >= 0 && diffMinutes <= 60) {
+                reminderToShow = app;
+                break;
+            }
         }
-        stmt.free();
+
         if (reminderToShow) {
+            reminderToShow.reminded_at = new Date().toISOString();
+            saveState();
             openReminderModal(reminderToShow);
-            markReminderShown(reminderToShow.id);
             renderSchedule();
         }
     }
+
     function processImage(file) {
         const reader = new FileReader();
         reader.onload = ev => {
@@ -858,8 +2410,7 @@
                 canvas.height = Math.round(img.height * scale);
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                const compressed = canvas.toDataURL('image/jpeg', 0.8);
-                settings.bgImage = compressed;
+                settings.bgImage = canvas.toDataURL('image/jpeg', 0.8);
                 applySettings(settings);
                 document.getElementById('uploadLabel').textContent = 'Изображение загружено';
             };
@@ -867,79 +2418,199 @@
         };
         reader.readAsDataURL(file);
     }
+
+    loadState();
     applySettings(settings);
     renderThemeGrid();
-    const demoTodayStr = getTimeZoneDateString();
-    const demoMinDate = addDaysToDateString(demoTodayStr, -DEMO_ALLOWED_DAY_OFFSET);
-    const demoMaxDate = addDaysToDateString(demoTodayStr, DEMO_ALLOWED_DAY_OFFSET);
-    flatpickr("#calendar", {
-        locale: "ru", inline: true, defaultDate: selectedDate, dateFormat: "Y-m-d",
-        minDate: DEMO_MODE ? demoMinDate : null, maxDate: DEMO_MODE ? demoMaxDate : null,
-        onChange: function(selectedDates, dateStr) {
-            if (DEMO_MODE && !isAllowedDemoDate(dateStr)) { showDemoLimit('В демо доступны только вчера, сегодня и завтра.'); return; }
-            selectedDate = dateStr; renderSchedule();
-        }
+    loadMastersIntoSelects();
+    currentCalendarDate = new Date(selectedDate);
+    renderCalendar();
+    renderSchedule();
+    resetModalForm();
+    saveState();
+
+
+    document.querySelectorAll('.layout-option').forEach(option => {
+        option.addEventListener('click', function() {
+            settings.layoutMode = this.dataset.layout;
+            document.querySelectorAll('.layout-option').forEach(item => item.classList.remove('active'));
+            this.classList.add('active');
+            applySettings(settings);
+            showToast(settings.layoutMode === 'calendar-right' ? 'Календарь перенесён вправо' : 'Календарь перенесён влево');
+        });
     });
-    document.getElementById('masterFilterSelect').addEventListener('change', function() { selectedMasterId = this.value; renderSchedule(); });
-    document.getElementById('openCreateModalBtn').addEventListener('click', function() { resetModalForm(); document.getElementById('appointmentModal').style.display = 'flex'; });
-    document.getElementById('modalCancelBtn').addEventListener('click', function() { document.getElementById('appointmentModal').style.display = 'none'; resetModalForm(); });
+
+    document.getElementById('prevMonthBtn').addEventListener('click', () => {
+        currentCalendarDate = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() - 1, 1);
+        renderCalendar();
+    });
+
+    document.getElementById('nextMonthBtn').addEventListener('click', () => {
+        currentCalendarDate = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 1);
+        renderCalendar();
+    });
+
+    document.getElementById('masterFilterSelect').addEventListener('change', function() {
+        selectedMasterId = this.value;
+        renderSchedule();
+    });
+
+    document.getElementById('openCreateModalBtn').addEventListener('click', function() {
+        resetModalForm();
+        document.getElementById('appointmentModal').style.display = 'flex';
+    });
+
+    document.getElementById('modalCancelBtn').addEventListener('click', function() {
+        document.getElementById('appointmentModal').style.display = 'none';
+        resetModalForm();
+    });
+
     document.getElementById('appointmentForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const id = document.getElementById('editAppointmentId').value;
+
+        const id = editingAppointmentId;
+        const date = document.getElementById('modalAppointmentDate').value;
         const time = document.getElementById('modalAppointmentTime').value;
         const masterId = document.getElementById('modalAppointmentMaster').value;
+        const price = parseInt(document.getElementById('modalAppointmentPrice').value || '0', 10) || 0;
         const clientName = document.getElementById('modalAppointmentClient').value.trim();
         const phone = document.getElementById('modalAppointmentPhone').value.trim();
         const service = document.getElementById('modalAppointmentService').value.trim();
         const note = document.getElementById('modalAppointmentNote').value.trim();
-        const remindEnabled = document.getElementById('modalAppointmentRemind').checked ? 1 : 0;
+        const remindEnabled = document.getElementById('modalAppointmentRemind').checked;
+
+        if (!date) { alert('Выберите дату'); return; }
         if (!masterId) { alert('Выберите мастера'); return; }
         if (!clientName || !phone || !service) { alert('Заполните все обязательные поля'); return; }
-        if (DEMO_MODE && !isAllowedDemoDate(selectedDate)) { showDemoLimit('В демо доступны только вчера, сегодня и завтра.'); return; }
-        if (DEMO_MODE && !id && getAppointmentsCount() >= DEMO_MAX_APPOINTMENTS) { showDemoLimit('Демо версия: можно создать не более 12 записей. Для полной версии свяжитесь с нами.'); return; }
-        if (id) {
-            const check = db.prepare(`SELECT id FROM appointments WHERE master_id = ? AND date = ? AND time = ? AND id != ?`);
-            check.bind([masterId, selectedDate, time, id]);
-            if (check.step()) { alert('Это время уже занято у выбранного мастера'); check.free(); return; }
-            check.free();
-            db.run(`UPDATE appointments SET master_id = ?, time = ?, client_name = ?, phone = ?, service = ?, note = ?, remind_enabled = ?, reminded_at = NULL WHERE id = ?`, [masterId, time, clientName, phone, service, note, remindEnabled, id]);
-        } else {
-            const check = db.prepare(`SELECT id FROM appointments WHERE master_id = ? AND date = ? AND time = ?`);
-            check.bind([masterId, selectedDate, time]);
-            if (check.step()) { alert('Это время уже занято у выбранного мастера'); check.free(); return; }
-            check.free();
-            db.run(`INSERT INTO appointments (master_id, date, time, client_name, phone, service, note, remind_enabled, reminded_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)`, [masterId, selectedDate, time, clientName, phone, service, note, remindEnabled]);
+
+        if (DEMO_MODE && !isAllowedDemoDate(date)) {
+            showDemoLimit('В демо доступны только вчера, сегодня и завтра.');
+            return;
         }
-        saveDatabase();
-        document.getElementById('appointmentModal').style.display = 'none';
-        resetModalForm();
+
+        if (DEMO_MODE && !id && getAppointmentsCount() >= DEMO_MAX_APPOINTMENTS) {
+            showDemoLimit('Демо версия: можно создать не более 12 записей. В полной версии ограничений нет.');
+            return;
+        }
+
+        const conflict = findCloseTimeConflict({
+            id,
+            masterId,
+            date,
+            time
+        });
+
+        if (conflict) {
+            alert(`Нельзя поставить запись так близко. У выбранного мастера уже есть запись в ${conflict.time}. Минимальный интервал: ${MIN_APPOINTMENT_INTERVAL_MINUTES} минут.`);
+            return;
+        }
+
+        if (id) {
+            const app = appointments.find(a => a.id === id);
+            if (!app) return;
+            app.date = date;
+            app.time = time;
+            app.master_id = Number(masterId);
+            app.price = price;
+            app.client_name = clientName;
+            app.phone = phone;
+            app.service = service;
+            app.note = note;
+            app.remind_enabled = remindEnabled;
+            app.reminded_at = null;
+        } else {
+            const nextId = appointments.length ? Math.max(...appointments.map(a => a.id)) + 1 : 1;
+            appointments.push({
+                id: nextId,
+                date,
+                time,
+                master_id: Number(masterId),
+                price,
+                client_name: clientName,
+                phone,
+                service,
+                note,
+                remind_enabled: remindEnabled,
+                reminded_at: null
+            });
+        }
+
+        selectedDate = date;
+        currentCalendarDate = new Date(date);
+        saveState();
+        renderCalendar();
         renderSchedule();
+
+        const appointmentModal = document.getElementById('appointmentModal');
+        appointmentModal.style.display = 'none';
+        resetModalForm();
+
+        setTimeout(() => {
+            showToast(id ? 'Запись обновлена' : 'Запись создана');
+        }, 120);
     });
+
     document.getElementById('refreshScheduleBtn').addEventListener('click', renderSchedule);
-    document.getElementById('openSettingsBtn').addEventListener('click', function() { renderThemeGrid(); document.getElementById('settingsModal').style.display = 'flex'; });
-    document.getElementById('closeSettingsBtn').addEventListener('click', function() { document.getElementById('settingsModal').style.display = 'none'; });
+
+    document.getElementById('openSettingsBtn').addEventListener('click', function() {
+        renderThemeGrid();
+        document.getElementById('settingsModal').style.display = 'flex';
+    });
+
+    document.getElementById('openClientsBtn').addEventListener('click', function() {
+        document.getElementById('clientSearchInput').value = '';
+        renderClientsList();
+        document.getElementById('clientsModal').style.display = 'flex';
+    });
+
+    document.getElementById('closeClientsBtn').addEventListener('click', function() {
+        document.getElementById('clientsModal').style.display = 'none';
+    });
+
+    document.getElementById('clientSearchInput').addEventListener('input', function() {
+        renderClientsList(this.value);
+    });
+
+    document.getElementById('closeSettingsBtn').addEventListener('click', function() {
+        document.getElementById('settingsModal').style.display = 'none';
+    });
+
     document.querySelectorAll('.settings-menu-item').forEach(item => {
         item.addEventListener('click', function() {
             document.querySelectorAll('.settings-menu-item').forEach(i => i.classList.remove('active'));
             this.classList.add('active');
-            const section = this.dataset.section;
             document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(`section-${section}`).classList.add('active');
+            document.getElementById(`section-${this.dataset.section}`).classList.add('active');
         });
     });
+
     document.getElementById('addMasterBtn').addEventListener('click', function() {
         const name = document.getElementById('newMasterName').value.trim();
         const spec = document.getElementById('newMasterSpecialization').value.trim();
-        if (!name || !spec) { alert('Заполните имя и специализацию'); return; }
-        if (DEMO_MODE && masters.length >= DEMO_MAX_MASTERS) { showDemoLimit('В демо доступно не более 2 мастеров.'); return; }
-        try {
-            db.run("INSERT INTO masters (name, specialization) VALUES (?, ?)", [name, spec]);
-            saveDatabase();
-            loadMasters();
-            document.getElementById('newMasterName').value = '';
-            document.getElementById('newMasterSpecialization').value = '';
-        } catch (e) { alert('Мастер уже существует'); }
+        if (!name || !spec) {
+            alert('Заполните имя и специализацию');
+            return;
+        }
+
+        if (DEMO_MODE && masters.length >= DEMO_MAX_MASTERS) {
+            showDemoLimit('Демо версия: доступно не более 2 мастеров. В полной версии ограничений нет.');
+            return;
+        }
+
+        if (masters.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+            alert('Мастер уже существует');
+            return;
+        }
+
+        const nextId = masters.length ? Math.max(...masters.map(m => m.id)) + 1 : 1;
+        masters.push({ id: nextId, name, specialization: spec });
+        saveState();
+        loadMastersIntoSelects();
+        document.getElementById('newMasterName').value = '';
+        document.getElementById('newMasterSpecialization').value = '';
+        renderSchedule();
     });
+
     document.getElementById('saveSettingsBtn').addEventListener('click', function() {
         settings = {
             ...settings,
@@ -950,15 +2621,34 @@
             salonAddress: document.getElementById('settingSalonAddress').value,
             borderRadius: parseInt(document.getElementById('settingBorderRadius').value, 10),
             borderRadiusSm: parseInt(document.getElementById('settingBorderRadiusSm').value, 10),
-            bgImageOpacity: parseFloat(document.getElementById('settingBgOpacity').value)
+            bgImageOpacity: parseFloat(document.getElementById('settingBgOpacity').value),
+            layoutMode: settings.layoutMode || 'calendar-left'
         };
-        saveSettingsToStorage();
+        saveSettings();
         applySettings(settings);
         renderSchedule();
-        alert('Настройки применены');
+        showToast('Настройки применены');
     });
-    document.getElementById('settingBorderRadius').addEventListener('input', function() { document.getElementById('borderRadiusValue').textContent = this.value + 'px'; });
-    document.getElementById('settingBorderRadiusSm').addEventListener('input', function() { document.getElementById('borderRadiusSmValue').textContent = this.value + 'px'; });
+
+    document.getElementById('resetSettingsBtn').addEventListener('click', function() {
+        if (!confirm('Сбросить все настройки к теме "Нежная роза"?')) return;
+        currentTheme = 'rose';
+        settings = { ...defaultSettings };
+        saveSettings();
+        applySettings(settings);
+        renderThemeGrid();
+        renderSchedule();
+        showToast('Настройки сброшены');
+    });
+
+    document.getElementById('settingBorderRadius').addEventListener('input', function() {
+        document.getElementById('borderRadiusValue').textContent = this.value + 'px';
+    });
+
+    document.getElementById('settingBorderRadiusSm').addEventListener('input', function() {
+        document.getElementById('borderRadiusSmValue').textContent = this.value + 'px';
+    });
+
     document.getElementById('bgImageUploadArea').addEventListener('click', () => document.getElementById('bgImageInput').click());
     document.getElementById('bgImageUploadArea').addEventListener('dragover', e => e.preventDefault());
     document.getElementById('bgImageUploadArea').addEventListener('drop', function(e) {
@@ -966,24 +2656,123 @@
         const file = e.dataTransfer.files[0];
         if (file && file.type.startsWith('image/')) processImage(file);
     });
-    document.getElementById('bgImageInput').addEventListener('change', function(e) { if (e.target.files[0]) processImage(e.target.files[0]); });
+
+    document.getElementById('bgImageInput').addEventListener('change', function(e) {
+        if (e.target.files[0]) processImage(e.target.files[0]);
+    });
+
     document.getElementById('removeBgImageBtn').addEventListener('click', function() {
         settings.bgImage = null;
         applySettings(settings);
         document.getElementById('uploadLabel').textContent = 'Нажмите или перетащите изображение';
         document.getElementById('bgImageInput').value = '';
     });
+
     document.getElementById('settingBgOpacity').addEventListener('input', function() {
         const opacity = parseFloat(this.value);
         document.getElementById('opacityValue').textContent = opacity.toFixed(2);
         settings.bgImageOpacity = opacity;
         document.getElementById('bgImageLayer').style.opacity = opacity;
     });
-    document.getElementById('copyReminderTextBtn').addEventListener('click', async function() {
-        try { await navigator.clipboard.writeText(currentReminderText); alert('Текст напоминания скопирован'); }
-        catch (e) { alert('Не удалось скопировать текст'); }
+
+    document.getElementById('exportDataBtn').addEventListener('click', function() {
+        const data = { masters, appointments, settings };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'salon_data.json';
+        a.click();
     });
-    document.getElementById('closeReminderBtn').addEventListener('click', function() { document.getElementById('reminderModal').style.display = 'none'; });
+
+    document.getElementById('importDataBtn').addEventListener('click', () => document.getElementById('importDataInput').click());
+    document.getElementById('importDataInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                masters = Array.isArray(data.masters) ? data.masters : masters;
+                appointments = Array.isArray(data.appointments) ? data.appointments : appointments;
+                if (data.settings) {
+                    settings = { ...defaultSettings, ...data.settings };
+                    currentTheme = settings.theme || 'rose';
+                    saveSettings();
+                    applySettings(settings);
+                    renderThemeGrid();
+                }
+                saveState();
+                loadMastersIntoSelects();
+                renderCalendar();
+                renderSchedule();
+                showToast('Данные импортированы');
+            } catch (err) {
+                alert('Ошибка файла');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    document.getElementById('exportThemeBtn').addEventListener('click', function() {
+        const blob = new Blob([JSON.stringify(settings, null, 2)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'salon_theme.json';
+        a.click();
+    });
+
+    document.getElementById('importThemeBtn').addEventListener('click', () => document.getElementById('importThemeInput').click());
+    document.getElementById('importThemeInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                settings = { ...defaultSettings, ...JSON.parse(ev.target.result) };
+                currentTheme = settings.theme || 'rose';
+                saveSettings();
+                applySettings(settings);
+                renderThemeGrid();
+                renderSchedule();
+                showToast('Тема импортирована');
+            } catch (err) {
+                alert('Ошибка файла');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    document.getElementById('clearAllDataBtn').addEventListener('click', function() {
+        if (!confirm('Удалить ВСЕ данные? Это действие нельзя отменить!')) return;
+        masters = [
+            { id: 1, name: 'Анна', specialization: 'Парикмахер' },
+            { id: 2, name: 'Елена', specialization: 'Мастер маникюра' },
+            { id: 3, name: 'Дарья', specialization: 'Визажист' }
+        ];
+        appointments = [];
+        selectedMasterId = '';
+        saveState();
+        loadMastersIntoSelects();
+        renderCalendar();
+        renderSchedule();
+        showToast('Все данные очищены');
+    });
+
+    document.getElementById('copyReminderTextBtn').addEventListener('click', async function() {
+        try {
+            await navigator.clipboard.writeText(currentReminderText);
+            showToast('Текст напоминания скопирован');
+        } catch (e) {
+            showToast('Не удалось скопировать текст');
+        }
+    });
+
+    document.getElementById('closeReminderBtn').addEventListener('click', function() {
+        document.getElementById('reminderModal').style.display = 'none';
+    });
+
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', function(e) {
             if (e.target !== this) return;
@@ -991,9 +2780,7 @@
             if (this.id === 'appointmentModal') resetModalForm();
         });
     });
-    loadMasters();
-    renderSchedule();
-    saveDatabase();
+
     checkUpcomingReminders();
     setInterval(checkUpcomingReminders, 60000);
 })();
@@ -1001,37 +2788,26 @@
 
 <!-- SEO блок для поиска -->
 <div style="max-width:900px;margin:60px auto;padding:0 20px;line-height:1.6;color:#4a3a3f;">
-
-<h2>Программа для записи клиентов оффлайн</h2>
-
-<p>
-Программа для записи клиентов оффлайн — это удобное решение для салонов красоты, парикмахерских и барбершопов.
-Система работает прямо на компьютере и не требует постоянного подключения к интернету.
-</p>
-
-<p>
-Это программа для записи клиентов без интернета, которая позволяет вести расписание мастеров,
-создавать записи и контролировать загрузку без сложных CRM систем.
-</p>
-
-<p>
-Подходит как простая программа для салона красоты без подписки. Вы устанавливаете её один раз
-и используете без ежемесячных платежей.
-</p>
-
-<p>
-Это программа записи клиентов на компьютер, которая идеально подходит для небольших студий
-и частных мастеров.
-</p>
-
-<div style="margin-top:25px;">
-<a href="https://vk.com/pashkevich_wtf" target="_blank"
-style="background:#d4a5b0;color:white;padding:14px 26px;border-radius:40px;text-decoration:none;font-weight:500;">
-Получить полную версию
-</a>
+    <h2>Демо программы для записи клиентов</h2>
+    <p>
+        Это демонстрационная версия программы для записи клиентов на компьютер. Подходит для салонов красоты,
+        парикмахерских, барбершопов, частных мастеров и небольших платных клиник.
+    </p>
+    <p>
+        В демо можно посмотреть календарь записи, расписание специалистов, клиентскую базу, учет дохода,
+        загрузку мастеров и напоминания.
+    </p>
+    <p>
+        Полная версия работает без демо-ограничений, без подписки и может использоваться как оффлайн-программа
+        для записи клиентов или пациентов.
+    </p>
+    <div style="margin-top:25px;">
+        <a href="https://vk.com/pashkevich_wtf" target="_blank" rel="noopener noreferrer"
+           style="background:#d4a5b0;color:white;padding:14px 26px;border-radius:40px;text-decoration:none;font-weight:500;">
+            Получить полную версию
+        </a>
+    </div>
 </div>
 
-</div>
-    
 </body>
 </html>
